@@ -1,15 +1,12 @@
 # Projeto de Sistemas Distribuídos 2016-2017 #
 
-Grupo CXX
-*(preencher com identificador de grupo e depois apagar esta linha)*
+Grupo T50
 
-... ... ...
-
-... ... ...
-
-... ... ...
-*(preencher com nome, número e email de membro do grupo e depois apagar esta linha)*
-
+Número | Nome | Email
+ --- | --- | ---
+77917	| Daniel José Nazaré Madruga | daniel.madruga@tecnico.ulisboa.pt
+78013	| Bruno Miguel Silva Henriques | bruno.s.henriques@tecnico.ulisboa.pt
+78042	| Bruno Miguel Nascimento Carola | bruno.carola@tecnico.ulisboa.pt
 
 -------------------------------------------------------------------------------
 **FIM**
