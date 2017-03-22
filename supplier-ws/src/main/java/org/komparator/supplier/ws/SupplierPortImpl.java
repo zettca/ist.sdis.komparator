@@ -52,9 +52,28 @@ public class SupplierPortImpl { // implements SupplierPortType {
 	}
 
 	public List<ProductView> searchProducts(String descText) throws BadText_Exception {
-		// TODO
+		//check argument not empty nor has spaces
+		if(descText == null)
+			throwBadText("Product description cannot be null!");
+		descText = descText.trim();
+		if (descText.length() == 0)
+			throwBadText("Product description cannot be empty or whitespace!");
 
-		return null;
+
+		//Get products in list of ProductView
+		Supplier supplier = Supplier.getInstance();
+		List<ProductView> pvs = new ArrayList<ProductView>();
+
+		//Get products id by description or get products by desc
+
+		for (String pid : supplier.getProductsIDs()) {
+			Product p = supplier.getProduct(pid);
+			if(p.getDescription().contains(descText)) {
+				ProductView pv = newProductView(p);
+				pvs.add(pv);
+			}
+		}
+		return pvs;
 	}
 
 	public String buyProduct(String productId, int quantity)
