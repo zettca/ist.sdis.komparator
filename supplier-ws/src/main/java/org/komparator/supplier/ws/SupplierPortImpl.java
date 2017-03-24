@@ -91,7 +91,7 @@ public class SupplierPortImpl { // implements SupplierPortType {
 		if (supplier.getProduct(productId) == null)
 			throwBadProductId("Product does not exist!");
 
-		String purchaseID = "";
+		String purchaseID = null;
 		try {
 			purchaseID = supplier.buyProduct(productId, quantity);
 		} catch (QuantityException e) {

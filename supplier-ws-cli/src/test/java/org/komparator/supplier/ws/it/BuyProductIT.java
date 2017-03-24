@@ -100,15 +100,16 @@ public class BuyProductIT extends BaseIT {
 	public void buyProductValidAmountTest()
 			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception {
 		String productId = "MR2";
-		client.buyProduct(productId, 2);
+		Assert.assertNotNull(client.buyProduct(productId, 2));
 		Assert.assertEquals(8, client.getProduct(productId).getQuantity());
+
 	}
 
 	@Test
 	public void buyProductMaxAmountTest()
 			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception {
 		String productId = "SK8";
-		client.buyProduct(productId, 4);
+		Assert.assertNotNull(client.buyProduct(productId, 4));
 		Assert.assertEquals(0, client.getProduct(productId).getQuantity());
 	}
 
@@ -118,7 +119,7 @@ public class BuyProductIT extends BaseIT {
 		String productId = "SK8";
 		int quantityBefore = client.getProduct(productId).getQuantity();
 		try {
-			client.buyProduct(productId, 8);
+			client.buyProduct(productId, quantityBefore + 1);
 			Assert.fail();
 		} catch (InsufficientQuantity_Exception e) {
 			Assert.assertEquals(quantityBefore, client.getProduct(productId).getQuantity());
