@@ -7,7 +7,7 @@
         your C (campus) with A (Alameda) / T (Tagus); and 
         your group number with two digits.
         Then delete this comment. -->
-    <groupId>org.komparator.CXX</groupId>
+    <groupId>org.komparator.T50</groupId>
     <artifactId>mediator-ws</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -24,7 +24,7 @@
         <mainclass>org.komparator.mediator.ws.MediatorApp</mainclass>
 
         <uddi.url>http://localhost:9090</uddi.url>
-        <ws.name>CXX_Mediator</ws.name>
+        <ws.name>T50_Mediator</ws.name>
         <ws.url>http://localhost:8080/mediator-ws/endpoint</ws.url>
     </properties>
 
