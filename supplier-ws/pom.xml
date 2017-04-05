@@ -19,9 +19,13 @@
 
         <mainclass>org.komparator.supplier.ws.SupplierApp</mainclass>
 
+        <uddi.url>http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/</uddi.url>
+
+        <ws.i>1</ws.i>
         <ws.host>localhost</ws.host>
-        <ws.port>8081</ws.port>
+        <ws.port>808${ws.i}</ws.port>
         <ws.url>http://${ws.host}:${ws.port}/supplier-ws/endpoint</ws.url>
+        <ws.name>T50_Supplier${ws.i}</ws.name>
     </properties>
 
     <dependencies>
@@ -30,6 +34,12 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
             <version>2.2.10</version>
+        </dependency>
+        <!-- UDDI Naming -->
+        <dependency>
+            <groupId>pt.ulisboa.tecnico.sdis</groupId>
+            <artifactId>uddi-naming</artifactId>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 
@@ -75,6 +85,8 @@
                     <mainClass>${mainclass}</mainClass>
                     <arguments>
                         <argument>${ws.url}</argument>
+                        <argument>${uddi.url}</argument>
+                        <argument>${ws.name}</argument>
                     </arguments>
                 </configuration>
             </plugin>

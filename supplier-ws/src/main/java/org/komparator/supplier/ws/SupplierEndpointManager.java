@@ -41,6 +41,14 @@ public class SupplierEndpointManager {
 		this.wsURL = wsURL;
 	}
 
+	public SupplierEndpointManager(String wsURL, String uddiURL, String wsName){
+		if (wsURL == null || uddiURL == null || wsName == null)
+			throw new NullPointerException("Web Service name, URL and UDDI URL cannot be null!");
+		this.wsURL = wsURL;
+
+		// TODO implement the rest
+	}
+
 	/* end point management */
 
 	public void start() throws Exception {

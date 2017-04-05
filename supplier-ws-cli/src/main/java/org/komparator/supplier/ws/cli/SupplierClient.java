@@ -55,6 +55,13 @@ public class SupplierClient implements SupplierPortType {
 		createStub();
 	}
 
+	public SupplierClient(String wsURL, String uddiURL, String wsName) throws SupplierClientException {
+		this.wsURL = wsURL;
+		createStub();
+
+		// TODO implement the rest
+	}
+
 	/** Stub creation and configuration */
 	private void createStub() {
 		if (verbose)
