@@ -33,6 +33,8 @@ public class SupplierClient implements SupplierPortType {
 
 	/** WS end point address */
 	private String wsURL = null; // default value is defined inside WSDL
+	private String uddiURL = null;
+	private String serviceName = null; // service name to contact
 
 	public String getWsURL() {
 		return wsURL;
@@ -55,11 +57,11 @@ public class SupplierClient implements SupplierPortType {
 		createStub();
 	}
 
-	public SupplierClient(String wsURL, String uddiURL, String wsName) throws SupplierClientException {
+	public SupplierClient(String wsURL, String uddiURL, String serviceName) throws SupplierClientException {
 		this.wsURL = wsURL;
+		this.uddiURL = uddiURL;
+		this.serviceName = serviceName;
 		createStub();
-
-		// TODO implement the rest
 	}
 
 	/** Stub creation and configuration */
