@@ -1,5 +1,7 @@
 package org.komparator.supplier.ws;
 
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+
 import java.io.IOException;
 
 import javax.xml.ws.Endpoint;
@@ -10,6 +12,8 @@ public class SupplierEndpointManager {
 
 	/** Web Service location to publish */
 	private String wsURL = null;
+	private String wsName = null;
+	private String uddiURL = null;
 
 	/** Port implementation */
 	private SupplierPortImpl portImpl = new SupplierPortImpl(this);
@@ -22,6 +26,7 @@ public class SupplierEndpointManager {
 
 	/** Web Service end point */
 	private Endpoint endpoint = null;
+	private UDDINaming uddiNaming = null;
 
 	/** output option **/
 	private boolean verbose = true;
@@ -45,8 +50,8 @@ public class SupplierEndpointManager {
 		if (wsURL == null || uddiURL == null || wsName == null)
 			throw new NullPointerException("Web Service name, URL and UDDI URL cannot be null!");
 		this.wsURL = wsURL;
-
-		// TODO implement the rest
+		this.wsName = wsName;
+		this.uddiURL = uddiURL;
 	}
 
 	/* end point management */
@@ -59,6 +64,11 @@ public class SupplierEndpointManager {
 				System.out.printf("Starting %s%n", wsURL);
 			}
 			endpoint.publish(wsURL);
+
+			// publish to UDDI
+			System.out.printf("Publishing '%s' to UDDI at %s%n", wsName, uddiURL);
+			uddiNaming = new UDDINaming(uddiURL);
+			uddiNaming.rebind(wsName, wsURL);
 		} catch (Exception e) {
 			endpoint = null;
 			if (verbose) {
