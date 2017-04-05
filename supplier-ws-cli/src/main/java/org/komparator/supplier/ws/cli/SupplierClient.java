@@ -16,6 +16,7 @@ import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.PurchaseView;
 import org.komparator.supplier.ws.SupplierPortType;
 import org.komparator.supplier.ws.SupplierService;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
 /**
  * Client port wrapper.
@@ -66,17 +67,34 @@ public class SupplierClient implements SupplierPortType {
 
 	/** Stub creation and configuration */
 	private void createStub() {
-		if (verbose)
+		String endpointAddress = null;
+		try{
+			System.out.printf("Contacting UDDI at %s%n", uddiURL);
+			UDDINaming uddiNaming = new UDDINaming(uddiURL);
+
+			System.out.printf("Looking for '%s'%n", serviceName);
+			endpointAddress = uddiNaming.lookup(serviceName);
+		} catch (Exception e){
+			endpointAddress = null;
+			if (verbose) {
+				System.out.printf("Caught exception when starting: %s%n", e);
+				e.printStackTrace();
+			}
+		}
+
+		if (verbose) {
 			System.out.println("Creating stub ...");
+		}
+
 		service = new SupplierService();
 		port = service.getSupplierPort();
 
-		if (wsURL != null) {
+		if (endpointAddress != null) {
 			if (verbose)
 				System.out.println("Setting endpoint address ...");
 			BindingProvider bindingProvider = (BindingProvider) port;
 			Map<String, Object> requestContext = bindingProvider.getRequestContext();
-			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
+			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
 		}
 	}
 
