@@ -19,7 +19,7 @@ import org.komparator.supplier.domain.Supplier;
 		targetNamespace = "http://ws.supplier.komparator.org/", 
 		serviceName = "SupplierService"
 )
-public class SupplierPortImpl { // implements SupplierPortType {
+public class SupplierPortImpl implements SupplierPortType {
 
 	// end point manager
 	private SupplierEndpointManager endpointManager;
