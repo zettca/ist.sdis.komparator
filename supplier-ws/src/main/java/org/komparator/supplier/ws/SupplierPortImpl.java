@@ -14,12 +14,12 @@ import org.komparator.supplier.domain.Supplier;
 @WebService(
 		endpointInterface = "org.komparator.supplier.ws.SupplierPortType", 
 		wsdlLocation = "supplier.1_0.wsdl", 
-		name = "MediatorWebService", 
-		portName = "MediatorPort", 
-		targetNamespace = "http://ws.mediator.komparator.org/", 
-		serviceName = "MediatorService"
+		name = "SupplierWebService", 
+		portName = "SupplierPort", 
+		targetNamespace = "http://ws.supplier.komparator.org/", 
+		serviceName = "SupplierService"
 )
-public class SupplierPortImpl implements SupplierPortType {
+public class SupplierPortImpl { // implements SupplierPortType {
 
 	// end point manager
 	private SupplierEndpointManager endpointManager;
