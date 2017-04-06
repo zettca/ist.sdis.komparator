@@ -3,10 +3,6 @@
     <modelVersion>4.0.0</modelVersion>
     <!-- http://maven.apache.org/pom.html#Quick_Overview -->
 
-	<!-- Please replace 'CXX' below with 
-        your C (campus) with A (Alameda) / T (Tagus); and 
-        your group number with two digits.
-        Then delete this comment. -->
     <groupId>org.komparator.T50</groupId>
     <artifactId>mediator-ws</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -23,7 +19,7 @@
 
         <mainclass>org.komparator.mediator.ws.MediatorApp</mainclass>
 
-        <uddi.url>http://localhost:9090</uddi.url>
+        <uddi.url>http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/</uddi.url>
         <ws.name>T50_Mediator</ws.name>
         <ws.url>http://localhost:8080/mediator-ws/endpoint</ws.url>
     </properties>
@@ -41,6 +37,11 @@
             <artifactId>uddi-naming</artifactId>
             <version>1.2</version>
         </dependency>
+        <dependency>
+	        <groupId>org.komparator.T50</groupId>
+	        <artifactId>supplier-ws-cli</artifactId>
+	        <version>1.0-SNAPSHOT</version>
+    	</dependency>
     </dependencies>
 
     <build>
