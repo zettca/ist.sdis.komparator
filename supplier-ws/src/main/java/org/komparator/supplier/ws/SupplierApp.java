@@ -1,9 +1,5 @@
 package org.komparator.supplier.ws;
 
-import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
-
-import javax.xml.ws.Endpoint;
-
 /** Main class that starts the Supplier Web Service. */
 public class SupplierApp {
 
@@ -11,7 +7,7 @@ public class SupplierApp {
 		// Check arguments
 		if (args.length < 3) {
 			System.err.println("Argument(s) missing!");
-			System.err.println("Usage: java " + SupplierApp.class.getName() + " wsURL");
+			System.err.println("Usage: java " + SupplierApp.class.getName() + " WS-URL UDDI-URL WS-NAME");
 			return;
 		}
 
@@ -20,11 +16,14 @@ public class SupplierApp {
 		String wsName = args[2];
 
 		// Create server implementation object
-		SupplierEndpointManager endpoint = new SupplierEndpointManager(wsURL, uddiURL, wsName);
+		SupplierEndpointManager endpoint = null;
 		try {
+			endpoint = new SupplierEndpointManager(wsURL, uddiURL, wsName);
 			endpoint.start();
 			endpoint.awaitConnections();
-		} finally {
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
 			endpoint.stop();
 		}
 	}

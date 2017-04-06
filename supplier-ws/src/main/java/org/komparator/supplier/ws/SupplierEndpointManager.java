@@ -18,11 +18,10 @@ public class SupplierEndpointManager {
 	/** Port implementation */
 	private SupplierPortImpl portImpl = new SupplierPortImpl(this);
 
-// TODO
-//	/** Obtain Port implementation */
-//	public SupplierPortType getPort() {
-//		return portImpl;
-//	}
+
+	public SupplierPortType getPort() {
+		return portImpl;
+	}
 
 	/** Web Service end point */
 	private Endpoint endpoint = null;
@@ -65,7 +64,7 @@ public class SupplierEndpointManager {
 			}
 			endpoint.publish(wsURL);
 
-			// publish to UDDI
+			// publish endpoint to UDDI
 			System.out.printf("Publishing '%s' to UDDI at %s%n", wsName, uddiURL);
 			uddiNaming = new UDDINaming(uddiURL);
 			uddiNaming.rebind(wsName, wsURL);
