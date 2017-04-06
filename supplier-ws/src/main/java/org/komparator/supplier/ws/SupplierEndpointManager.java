@@ -106,6 +106,20 @@ public class SupplierEndpointManager {
 				System.out.printf("Caught exception when stopping: %s%n", e);
 			}
 		}
+
+		try {
+			if (uddiNaming != null) {
+				// remote UDDI service entry
+				uddiNaming.unbind(wsName);
+				if (verbose) {
+					System.out.printf("Stopped %s%n", wsURL);
+				}
+			}
+		} catch (Exception e) {
+			if (verbose) {
+				System.out.printf("Caught exception when stopping: %s%n", e);
+			}
+		}
 		this.portImpl = null;
 	}
 
