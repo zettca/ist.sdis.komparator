@@ -11,11 +11,11 @@ public class SupplierClientApp {
 			return;
 		}
 		String uddiURL = args[0];
-		String serviceName = args[1];
+		String wsName = args[1];
 
 		// Create client
 		System.out.println("Creating client for server");
-		SupplierClient client = new SupplierClient(uddiURL, serviceName);
+		SupplierClient client = new SupplierClient(uddiURL, wsName);
 
 		// the following remote invocations are just basic examples
 		// the actual tests are made using JUnit
