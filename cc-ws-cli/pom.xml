@@ -28,7 +28,7 @@
 		<mainclass>pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClientApp</mainclass>
 
         <ws.name>CreditCard</ws.name>
-        <uddi.url>http://localhost:9090</uddi.url>
+        <uddi.url>http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/</uddi.url>
     </properties>
 
     <dependencies>
