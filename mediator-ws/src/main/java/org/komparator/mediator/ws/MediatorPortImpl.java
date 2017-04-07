@@ -113,15 +113,64 @@ public class MediatorPortImpl implements MediatorPortType {
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-		// TODO Auto-generated method stub
-		if(carts.containsKey(cartId)){
-			CartItemView cartItem = itemViewToCartItemView(itemId, itemQty);
-			if(carts.get(cartId).getItems().contains(cartItem)){
-				for(CartItemView i : carts.get(cartId).getItems()){
-					
+		// TODO exception validade dos args
+		
+		CartItemView cartItem = itemViewToCartItemView(itemId, itemQty);
+		if(carts.containsKey(cartId)){			//verifica se existe o cart
+			
+			for(CartItemView ite : carts.get(cartId).getItems()){		//verifica se ja ha este item
+				if(ite.getItem().getItemId().equals(itemId)){
+					for(CartItemView i : carts.get(cartId).getItems()){
+						if(cartItem.equals(i)){
+							int gtyTotal = i.getQuantity() + itemQty;
+							
+							try {
+								if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=gtyTotal)
+									i.setQuantity(gtyTotal);
+								else{		//quantidades erradas
+									//TODO EXCEPTION
+								}
+							} catch (BadProductId_Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}else{
+							continue;
+						}
+					}
 				}
 			}
-			carts.get(cartId).items.add(cartItem);
+		  //quando o item ainda nao ha adiciona-o
+			try {
+				if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=itemQty)
+					carts.get(cartId).items.add(cartItem);
+
+				else{		//quantidades erradas
+					//TODO EXCEPTION
+				}
+			} catch (BadProductId_Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		else{//criar cart caso não exista
+			CartView cart = new CartView();
+			try {
+				if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=itemQty){
+					cartItem.setQuantity(itemQty);
+					cart.setCartId(cartId);
+					cart.items.add(cartItem);
+					carts.put(cartId, cart);
+				}
+				else{		//quantidades erradas
+					//TODO EXCEPTION
+				}
+			} catch (BadProductId_Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 		
 		
