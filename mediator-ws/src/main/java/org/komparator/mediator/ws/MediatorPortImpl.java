@@ -57,9 +57,9 @@ public class MediatorPortImpl implements MediatorPortType {
 		}
 	}
 
+	
 	// Main operations -------------------------------------------------------
 
-    // TODO
 	@Override
 	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
 		List<ItemView> items = new ArrayList<>();
@@ -84,10 +84,45 @@ public class MediatorPortImpl implements MediatorPortType {
 		return items;
 	}
 	
+	private List<ProductView> getItemByDesc(SupplierClient client, String descText){
+		List<ProductView> products = new ArrayList<ProductView>();
+		for(ProductView p: client.listProducts()){
+			if(p.getDesc().equals(descText))
+				products.add(p);
+		}
+		return products;
+	}
+	
 	@Override
 	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
-		// TODO Auto-generated method stub
-		return null;
+		List<ItemView> items = new ArrayList<>();
+
+		try {// TODO EXCEPTION PRODUCT NOT FOUND
+			for (String clientName : suppliers.keySet()) {
+				SupplierClient client = suppliers.get(clientName);
+				for(ProductView product : getItemByDesc(client, descText)){
+					ItemView item = new ItemView();
+					item.setDesc(product.getDesc());
+					item.setPrice(product.getPrice());
+					ItemIdView itemId = new ItemIdView();
+					itemId.setProductId(product.getId());
+					itemId.setSupplierId(clientName);
+					item.setItemId(itemId);
+					items.add(item);
+				}
+			}
+		} catch (Exception e){
+			System.out.println("Error connecting to suppliers...");
+		}
+		if (items.size() > 0) {
+			  Collections.sort(items, new Comparator<ItemView>() {
+			      @Override
+			      public int compare(final ItemView object1, final ItemView object2) {
+			          return object1.getItemId().toString().compareTo(object2.getItemId().toString());
+			      }
+			  });
+			}
+		return items;
 	}
 	
 	@Override
