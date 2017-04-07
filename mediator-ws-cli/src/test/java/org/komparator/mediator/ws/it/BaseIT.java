@@ -50,12 +50,15 @@ public class BaseIT {
 
 	@BeforeClass
 	public static void populate() throws SupplierClientException {
-		supplier1 = new SupplierClient("http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/","T50_Komparator1");
-		supplier2 = new SupplierClient("http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/","T50_Komparator2");
+		supplier1 = new SupplierClient("http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/",
+				"SupplierTest1");
+		supplier2 = new SupplierClient("http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/",
+				"SupplierTest2");
 
 		ProductView product1 = new ProductView();
 		ProductView product2 = new ProductView();
 		ProductView product3 = new ProductView();
+		ProductView product4 = new ProductView();
 
 		product1.setId("Batata");
 		product1.setDesc("Batatas sabem bem");
@@ -72,10 +75,16 @@ public class BaseIT {
 		product3.setPrice(3);
 		product3.setQuantity(30);
 
+		product4.setId("Batata");
+		product4.setDesc("Batatas sabem bem");
+		product4.setPrice(2);
+		product4.setQuantity(20);
+
 		try {
 			supplier1.createProduct(product1);
 			supplier1.createProduct(product2);
 			supplier2.createProduct(product3);
+			supplier2.createProduct(product4);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
