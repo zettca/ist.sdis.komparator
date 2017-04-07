@@ -223,25 +223,23 @@ public class MediatorPortImpl implements MediatorPortType {
 			try {
 				client.buyProduct(productId, qty);
 			} catch (BadProductId_Exception | BadQuantity_Exception | InsufficientQuantity_Exception e) {
-				drop.add(cartItem);
+				shopRes.droppedItems.add(cartItem);
 				continue;
 			}
 			price += cartItem.getItem().getPrice() * qty;
-			purch.add(cartItem);
+			shopRes.purchasedItems.add(cartItem);
 
         }
         Result res;
         
-        if(drop.isEmpty()) res = Result.COMPLETE;
+        if(shopRes.droppedItems.isEmpty()) res = Result.COMPLETE;
         
-        else if (purch.isEmpty()) res = Result.EMPTY;
+        else if (shopRes.purchasedItems.isEmpty()) res = Result.EMPTY;
         
         else res = Result.PARTIAL;
         
         shopRes.setResult(res);
         shopRes.setTotalPrice(price);
-        shopRes.purchasedItems=purch;
-        shopRes.droppedItems=drop;
         shopRes.setId(""+shopId);
         shopId++;
         
