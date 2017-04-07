@@ -1,10 +1,17 @@
 package org.komparator.mediator.ws;
 
 import org.komparator.supplier.ws.BadProductId_Exception;
+import org.komparator.supplier.ws.BadQuantity_Exception;
+import org.komparator.supplier.ws.InsufficientQuantity_Exception;
 import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.cli.SupplierClient;
+
+import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClient;
+import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClientException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
+
 
 import java.util.*;
 
@@ -25,7 +32,9 @@ public class MediatorPortImpl implements MediatorPortType {
 	private MediatorEndpointManager endpointManager;
 	private Map<String, SupplierClient> suppliers;
 	private Map<String, CartView> carts;
-
+	private List<ShoppingResultView> shopHistory;
+	
+	private int shopId=0;
 
 	public MediatorPortImpl() {
 	}
@@ -34,6 +43,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		this.endpointManager = endpointManager;
 		this.suppliers = new HashMap<String, SupplierClient>();
 		this.carts = new HashMap<String, CartView>();
+		this.shopHistory = new ArrayList<ShoppingResultView>();
 	}
 
 	public MediatorEndpointManager getEndpointManager() {
@@ -113,8 +123,8 @@ public class MediatorPortImpl implements MediatorPortType {
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-		// TODO exception validade dos args
 		
+		updateSuppliers();
 		CartItemView cartItem = itemViewToCartItemView(itemId, itemQty);
 		if(carts.containsKey(cartId)){			//verifica se existe o cart
 			
@@ -127,7 +137,7 @@ public class MediatorPortImpl implements MediatorPortType {
 							try {
 								if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=gtyTotal)
 									i.setQuantity(gtyTotal);
-								else{		//quantidades erradas
+								else{		//TODO quantidades erradas
 									//TODO EXCEPTION
 								}
 							} catch (BadProductId_Exception e) {
@@ -140,7 +150,7 @@ public class MediatorPortImpl implements MediatorPortType {
 					}
 				}
 			}
-		  //quando o item ainda nao ha adiciona-o
+			//quando o item ainda nao ha adiciona-o
 			try {
 				if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=itemQty)
 					carts.get(cartId).items.add(cartItem);
@@ -170,17 +180,74 @@ public class MediatorPortImpl implements MediatorPortType {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 		}
-		
-		
 	}
 	
 	@Override
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
-		// TODO Auto-generated method stub
-		return null;
+		
+		updateSuppliers();
+		CartView cart = carts.get(cartId);
+		String supplierName;
+		String productId;
+		int qty;
+		ShoppingResultView shopRes = new ShoppingResultView();
+		List<CartItemView> drop = new ArrayList<CartItemView>();
+		List<CartItemView> purch = new ArrayList<CartItemView>();
+		int price = 0;
+ 
+        if(cart.getItems().isEmpty()) {
+            EmptyCart_Exception("Cart is empty");
+        }
+ 
+        try {
+            UDDINaming uddiNaming = endpointManager.getUddiNaming();
+            String creditCardURL = uddiNaming.lookup("CreditCard");
+ 
+            CreditCardClient cardClient = new CreditCardClient(endpointManager.getWsName());
+            if(!cardClient.validateNumber(creditCardNr)) {
+            	InvalidCreditCard_Exception("Invalid card Exception");
+            }
+ 
+        } catch (UDDINamingException | CreditCardClientException e) {
+            System.out.println("Exception thrown.");
+        }
+        for(CartItemView cartItem : cart.getItems()){
+        	supplierName = cartItem.getItem().getItemId().getSupplierId();
+        	productId = cartItem.getItem().getItemId().getProductId();
+        	qty = cartItem.getQuantity();
+        	
+			SupplierClient client = suppliers.get(supplierName);
+			
+			try {
+				client.buyProduct(productId, qty);
+			} catch (BadProductId_Exception | BadQuantity_Exception | InsufficientQuantity_Exception e) {
+				drop.add(cartItem);
+				continue;
+			}
+			price += cartItem.getItem().getPrice() * qty;
+			purch.add(cartItem);
+
+        }
+        Result res;
+        
+        if(drop.isEmpty()) res = Result.COMPLETE;
+        
+        else if (purch.isEmpty()) res = Result.EMPTY;
+        
+        else res = Result.PARTIAL;
+        
+        shopRes.setResult(res);
+        shopRes.setTotalPrice(price);
+        shopRes.purchasedItems=purch;
+        shopRes.droppedItems=drop;
+        shopRes.setId(""+shopId);
+        shopId++;
+        
+        shopHistory.add(shopRes);
+        
+		return shopRes;
 	}
 	
     
@@ -226,20 +293,18 @@ public class MediatorPortImpl implements MediatorPortType {
 	
 	@Override
 	public List<CartView> listCarts() {
-		// TODO Auto-generated method stub
-		return null;
+		return (List<CartView>) carts.values();
 	}
 
 	@Override
-	public List<ShoppingResultView> shopHistory() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<ShoppingResultView> shopHistory() {		
+		return shopHistory;
 	}
 
 	
 	// View helpers -----------------------------------------------------
 	
-    // TODO
+
 	public ItemView productViewToItemView(String clientName, ProductView product){
 		ItemView item = new ItemView();
 		item.setDesc(product.getDesc());
@@ -271,6 +336,54 @@ public class MediatorPortImpl implements MediatorPortType {
     
 	// Exception helpers -----------------------------------------------------
 
-    // TODO
+	 
+    /** Helper method to throw new EmptyCart exception */
+    private void EmptyCart_Exception(final String message) throws EmptyCart_Exception {
+        EmptyCart faultInfo = new EmptyCart();
+        faultInfo.message = message;
+        throw new EmptyCart_Exception(message, faultInfo);
+    }
+ 
+    /** Helper method to throw new InvalidCreditCard exception */
+    private void InvalidCartId_Exception(final String message) throws InvalidCreditCard_Exception {
+        InvalidCreditCard faultInfo = new InvalidCreditCard();
+        faultInfo.message = message;
+        throw new InvalidCreditCard_Exception(message, faultInfo);
+    }
+    
+    /** Helper method to throw new InvalidCreditCard exception */
+    private void InvalidCreditCard_Exception(final String message) throws InvalidCreditCard_Exception {
+    	InvalidCreditCard faultInfo = new InvalidCreditCard();
+        faultInfo.message = message;
+        throw new InvalidCreditCard_Exception(message, faultInfo);
+    }
+ 
+    /** Helper method to throw new InvalidItemId exception */
+    private void InvalidItemId_Exception(final String message) throws InvalidItemId_Exception {
+        InvalidItemId faultInfo = new InvalidItemId();
+        faultInfo.message = message;
+        throw new InvalidItemId_Exception(message, faultInfo);
+    }
+ 
+    /** Helper method to throw new InvalidQuantity exception */
+    private void InvalidQuantity_Exception(final String message) throws InvalidQuantity_Exception {
+        InvalidQuantity faultInfo = new InvalidQuantity();
+        faultInfo.message = message;
+        throw new InvalidQuantity_Exception(message, faultInfo);
+    }
+ 
+    /** Helper method to throw new NotEnoughItems exception */
+    private void NotEnoughItems_Exception(final String message) throws NotEnoughItems_Exception {
+        NotEnoughItems faultInfo = new NotEnoughItems();
+        faultInfo.message = message;
+        throw new NotEnoughItems_Exception(message, faultInfo);
+    }
+ 
+    /** Helper method to throw new InvalidText exception */
+    private void InvalidText_Exception(final String message) throws InvalidText_Exception {
+        InvalidText faultInfo = new InvalidText();
+        faultInfo.message = message;
+        throw new InvalidText_Exception(message, faultInfo);
+    }
 
 }
