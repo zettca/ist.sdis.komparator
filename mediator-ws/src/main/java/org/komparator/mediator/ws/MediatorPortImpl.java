@@ -123,6 +123,14 @@ public class MediatorPortImpl implements MediatorPortType {
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+
+		if (cartId == null || cartId.trim().length() == 0) {
+			throwInvalidCartId_Exception("Cart ID cannot be null or empty");
+		} else if (itemId == null || cartId.trim().length() == 0) {
+			throwInvalidItemId_Exception("Item ID cannot be null or empty");
+		} else if (itemQty <= 0) {
+			throwInvalidQuantity_Exception("Quantity must be positive");
+		}
 		
 		updateSuppliers();
 		CartItemView cartItem = itemViewToCartItemView(itemId, itemQty);
@@ -198,7 +206,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		int price = 0;
  
         if(cart.getItems().isEmpty()) {
-            EmptyCart_Exception("Cart is empty");
+            throwEmptyCart_Exception("Cart is empty");
         }
  
         try {
@@ -207,7 +215,7 @@ public class MediatorPortImpl implements MediatorPortType {
  
             CreditCardClient cardClient = new CreditCardClient(endpointManager.getWsName());
             if(!cardClient.validateNumber(creditCardNr)) {
-            	InvalidCreditCard_Exception("Invalid card Exception");
+            	throwInvalidCreditCard_Exception("Invalid card Exception");
             }
  
         } catch (UDDINamingException | CreditCardClientException e) {
@@ -338,49 +346,49 @@ public class MediatorPortImpl implements MediatorPortType {
 
 	 
     /** Helper method to throw new EmptyCart exception */
-    private void EmptyCart_Exception(final String message) throws EmptyCart_Exception {
+    private void throwEmptyCart_Exception(final String message) throws EmptyCart_Exception {
         EmptyCart faultInfo = new EmptyCart();
         faultInfo.message = message;
         throw new EmptyCart_Exception(message, faultInfo);
     }
  
     /** Helper method to throw new InvalidCreditCard exception */
-    private void InvalidCartId_Exception(final String message) throws InvalidCreditCard_Exception {
+    private void throwInvalidCartId_Exception(final String message) throws InvalidCartId_Exception {
         InvalidCreditCard faultInfo = new InvalidCreditCard();
         faultInfo.message = message;
         throw new InvalidCreditCard_Exception(message, faultInfo);
     }
     
     /** Helper method to throw new InvalidCreditCard exception */
-    private void InvalidCreditCard_Exception(final String message) throws InvalidCreditCard_Exception {
+    private void throwInvalidCreditCard_Exception(final String message) throws InvalidCreditCard_Exception {
     	InvalidCreditCard faultInfo = new InvalidCreditCard();
         faultInfo.message = message;
         throw new InvalidCreditCard_Exception(message, faultInfo);
     }
  
     /** Helper method to throw new InvalidItemId exception */
-    private void InvalidItemId_Exception(final String message) throws InvalidItemId_Exception {
+    private void throwInvalidItemId_Exception(final String message) throws InvalidItemId_Exception {
         InvalidItemId faultInfo = new InvalidItemId();
         faultInfo.message = message;
         throw new InvalidItemId_Exception(message, faultInfo);
     }
  
     /** Helper method to throw new InvalidQuantity exception */
-    private void InvalidQuantity_Exception(final String message) throws InvalidQuantity_Exception {
+    private void throwInvalidQuantity_Exception(final String message) throws InvalidQuantity_Exception {
         InvalidQuantity faultInfo = new InvalidQuantity();
         faultInfo.message = message;
         throw new InvalidQuantity_Exception(message, faultInfo);
     }
  
     /** Helper method to throw new NotEnoughItems exception */
-    private void NotEnoughItems_Exception(final String message) throws NotEnoughItems_Exception {
+    private void throwNotEnoughItems_Exception(final String message) throws NotEnoughItems_Exception {
         NotEnoughItems faultInfo = new NotEnoughItems();
         faultInfo.message = message;
         throw new NotEnoughItems_Exception(message, faultInfo);
     }
  
     /** Helper method to throw new InvalidText exception */
-    private void InvalidText_Exception(final String message) throws InvalidText_Exception {
+    private void throwInvalidText_Exception(final String message) throws InvalidText_Exception {
         InvalidText faultInfo = new InvalidText();
         faultInfo.message = message;
         throw new InvalidText_Exception(message, faultInfo);
