@@ -12,6 +12,7 @@ import org.komparator.supplier.ws.cli.SupplierClientException;
 public class BaseIT {
 
 	private static final String TEST_PROP_FILE = "/test.properties";
+	private static final String uddiURL = "http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/";
 	protected static Properties testProps;
 
 	protected static MediatorClient mediatorClient;
@@ -50,10 +51,8 @@ public class BaseIT {
 
 	@BeforeClass
 	public static void populate() throws SupplierClientException {
-		supplier1 = new SupplierClient("http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/",
-				"SupplierTest1");
-		supplier2 = new SupplierClient("http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/",
-				"SupplierTest2");
+		supplier1 = new SupplierClient(uddiURL, "T50_Supplier1");
+		supplier2 = new SupplierClient(uddiURL, "T50_Supplier2");
 
 		ProductView product1 = new ProductView();
 		ProductView product2 = new ProductView();
