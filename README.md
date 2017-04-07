@@ -77,7 +77,7 @@ mvn install
 ```
 
 
-[5]Correr Aplicação
+## Correr Aplicação
 
    Abrir consola para Fornecedor 1:
        
@@ -97,7 +97,7 @@ mvn install
        mvn exec:java
        O resultado final do ping deverá ser impresso nesta consola.
 
-Correr testes de integração 
+## Correr testes de integração 
        
        cd supplier-ws
        mvn compile exec:java   
