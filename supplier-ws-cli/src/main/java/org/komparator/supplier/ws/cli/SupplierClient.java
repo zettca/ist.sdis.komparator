@@ -54,8 +54,10 @@ public class SupplierClient implements SupplierPortType {
 
 	/** constructor with provided web service URL */
 	public SupplierClient(String wsURL) throws SupplierClientException {
+		System.out.println("3333333333333!");
+
 		this.wsURL = wsURL;
-		createStub();
+		createStub2();
 	}
 
 	public SupplierClient(String uddiURL, String serviceName) throws SupplierClientException {
@@ -96,6 +98,36 @@ public class SupplierClient implements SupplierPortType {
 			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
 		}
 	}
+	
+	/** Stub creation and configuration */
+    private void createStub2() {
+        if (verbose){
+            System.out.println("Creating stub ...");
+        }
+		System.out.println("3333333333333!");
+
+        service = new SupplierService();
+        
+		System.out.println("4444444444444!");
+
+        port = service.getSupplierPort();
+        
+		System.out.println("55555555555555!");
+
+ 
+        if (wsURL != null) {
+            if (verbose)
+                System.out.println("Setting endpoint address ...");
+            
+			System.out.println("666666666666666!");
+
+            BindingProvider bindingProvider = (BindingProvider) port;
+            Map<String, Object> requestContext = bindingProvider.getRequestContext();
+            requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
+        }
+    }	
+	
+	
 
 	// remote invocation methods ----------------------------------------------
 
