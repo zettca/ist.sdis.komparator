@@ -208,12 +208,8 @@ public class MediatorPortImpl implements MediatorPortType {
 		
 		updateSuppliers();
 		CartView cart = carts.get(cartId);
-		String supplierName;
-		String productId;
-		int qty;
+		String supplierName, productId;
 		ShoppingResultView shopRes = new ShoppingResultView();
-		List<CartItemView> drop = new ArrayList<CartItemView>();
-		List<CartItemView> purch = new ArrayList<CartItemView>();
 		int price = 0;
 
 		if(cart.getItems().isEmpty()) {
@@ -221,21 +217,18 @@ public class MediatorPortImpl implements MediatorPortType {
 		}
 
 		try {
-			UDDINaming uddiNaming = endpointManager.getUddiNaming();
-			String creditCardURL = uddiNaming.lookup("CreditCard");
-
 			CreditCardClient cardClient = new CreditCardClient(endpointManager.getWsName());
 			if(!cardClient.validateNumber(creditCardNr)) {
 				throwInvalidCreditCard_Exception("Invalid card Exception");
 			}
-
-		} catch (UDDINamingException | CreditCardClientException e) {
-			System.out.println("Exception thrown.");
+		} catch (CreditCardClientException e) {
+			System.out.println("Error connecting to CreditCard.");
 		}
+
 		for(CartItemView cartItem : cart.getItems()){
 			supplierName = cartItem.getItem().getItemId().getSupplierId();
 			productId = cartItem.getItem().getItemId().getProductId();
-			qty = cartItem.getQuantity();
+			int qty = cartItem.getQuantity();
 
 			SupplierClient client = suppliers.get(supplierName);
 			
@@ -247,7 +240,6 @@ public class MediatorPortImpl implements MediatorPortType {
 			}
 			price += cartItem.getItem().getPrice() * qty;
 			shopRes.purchasedItems.add(cartItem);
-
         }
         Result res;
         
@@ -259,9 +251,8 @@ public class MediatorPortImpl implements MediatorPortType {
         
         shopRes.setResult(res);
         shopRes.setTotalPrice(price);
-        shopRes.setId(""+shopId);
+        shopRes.setId("ShoppingResultView"+shopId);
         shopId++;
-        
         shopHistory.add(shopRes);
         
 		return shopRes;
