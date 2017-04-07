@@ -22,6 +22,10 @@ public class SupplierEndpointManager {
 	public SupplierPortType getPort() {
 		return portImpl;
 	}
+	
+	public String getWsName() {
+		return wsName;
+	}
 
 	/** Web Service end point */
 	private Endpoint endpoint = null;
