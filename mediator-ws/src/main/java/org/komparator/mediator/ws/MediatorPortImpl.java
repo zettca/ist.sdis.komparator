@@ -168,7 +168,16 @@ public class MediatorPortImpl implements MediatorPortType {
 	@Override
 	public void clear() {
 		// TODO Auto-generated method stub
-		
+		try { 
+			for (String clientName : suppliers.keySet()) {
+				SupplierClient client = suppliers.get(clientName);
+				client.clear();
+				
+			}
+		} catch (Exception e){
+			System.out.println("Error connecting to suppliers...");
+		}
+		suppliers.clear();
 	}
 	
 	@Override
