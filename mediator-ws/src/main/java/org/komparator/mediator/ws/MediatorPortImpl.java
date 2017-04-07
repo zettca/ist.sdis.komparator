@@ -35,6 +35,7 @@ public class MediatorPortImpl implements MediatorPortType {
 	private List<ShoppingResultView> shopHistory;
 	
 	private int shopId=0;
+	private Map<String, CartView> ;
 
 	public MediatorPortImpl() {
 	}
@@ -77,8 +78,11 @@ public class MediatorPortImpl implements MediatorPortType {
 	
 	@Override
 	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
-		List<ItemView> items = new ArrayList<>();
+		if (productId == null || productId.trim().length() == 0){
+			throwInvalidItemId_Exception("Item ID cannot be null or empty");
+		}
 
+		List<ItemView> items = new ArrayList<>();
 		try {
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
@@ -95,9 +99,12 @@ public class MediatorPortImpl implements MediatorPortType {
 
 	@Override
 	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
-		List<ItemView> items = new ArrayList<>();
+		if (descText == null || descText.trim().length() == 0) {
+			throwInvalidText_Exception("Search query cannot be null or empty");
+		}
 
-		try {// TODO EXCEPTION PRODUCT NOT FOUND
+		List<ItemView> items = new ArrayList<>();
+		try {
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
 				for(ProductView product : client.searchProducts(descText)){
@@ -105,18 +112,20 @@ public class MediatorPortImpl implements MediatorPortType {
 					items.add(item);
 				}
 			}
-
-			if (items.size() > 0) {
-				Collections.sort(items, new Comparator<ItemView>() {
-					@Override
-					public int compare(final ItemView object1, final ItemView object2) {
-						return object1.getItemId().toString().compareTo(object2.getItemId().toString());
-					}
-				});
-			}
 		} catch (Exception e){
 			System.out.println("Error connecting to suppliers...");
 		}
+
+		if (items.size() > 0) {
+			Collections.sort(items, new Comparator<ItemView>() {
+				@Override
+				public int compare(final ItemView item1, final ItemView item2) {
+					int res = item1.getItemId().toString().compareTo(item2.getItemId().toString());
+					return (res == 0) ? item1.getPrice() - item2.getPrice() : res;
+				}
+			});
+		}
+
 		return items;
 	}
 	
@@ -134,59 +143,56 @@ public class MediatorPortImpl implements MediatorPortType {
 		
 		updateSuppliers();
 		CartItemView cartItem = itemViewToCartItemView(itemId, itemQty);
-		if(carts.containsKey(cartId)){			//verifica se existe o cart
+		// Procura o card, ou cria um novo se não existir
+		CartView cart = null;
+		if(carts.containsKey(cartId)){	//verifica se existe o cart
+			cart = carts.get(cartId);
 			
-			for(CartItemView ite : carts.get(cartId).getItems()){		//verifica se ja ha este item
-				if(ite.getItem().getItemId().equals(itemId)){
-					for(CartItemView i : carts.get(cartId).getItems()){
-						if(cartItem.equals(i)){
-							int gtyTotal = i.getQuantity() + itemQty;
+			for(CartItemView item : cart.getItems()){	//verifica se ja ha este item
+				if(item.getItem().getItemId().equals(itemId)){ // item existe
+					for(CartItemView it : cart.getItems()){
+						if(cartItem.equals(it)){ // encontrou o item
+							int gtyTotal = it.getQuantity() + itemQty;
 							
 							try {
-								if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=gtyTotal)
-									i.setQuantity(gtyTotal);
-								else{		//TODO quantidades erradas
-									//TODO EXCEPTION
+								if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=gtyTotal) {
+									it.setQuantity(gtyTotal);
+								} else {
+									throwNotEnoughItems_Exception("Not enough items in stock");
 								}
 							} catch (BadProductId_Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								throwInvalidItemId_Exception("Item does not exist");
 							}
-						}else{
-							continue;
 						}
 					}
 				}
 			}
-			//quando o item ainda nao ha adiciona-o
+			// quando o item ainda nao ha adiciona-o
 			try {
-				if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=itemQty)
-					carts.get(cartId).items.add(cartItem);
+				if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity() >= itemQty)
+					cart.items.add(cartItem);
 
-				else{		//quantidades erradas
-					//TODO EXCEPTION
+				else{	//quantidades erradas
+					throwNotEnoughItems_Exception("Not enough items in stock");
 				}
 			} catch (BadProductId_Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throwInvalidItemId_Exception("Item does not exist");
 			}
 			
-		}
-		else{//criar cart caso não exista
-			CartView cart = new CartView();
+		} else{	// criar cart caso não exista
+			cart = new CartView();
 			try {
-				if(suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId()).getQuantity()>=itemQty){
+				ProductView product = suppliers.get(itemId.getSupplierId()).getProduct(itemId.getProductId());
+				if (product.getQuantity() >= itemQty) {
 					cartItem.setQuantity(itemQty);
 					cart.setCartId(cartId);
 					cart.items.add(cartItem);
 					carts.put(cartId, cart);
-				}
-				else{		//quantidades erradas
-					//TODO EXCEPTION
+				} else {
+					throwNotEnoughItems_Exception("Not enough items in stock");
 				}
 			} catch (BadProductId_Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throwInvalidItemId_Exception("Item does not exist");
 			}
 		}
 	}
