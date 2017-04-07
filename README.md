@@ -46,31 +46,34 @@ git clone -b SD_P2 https://github.com/tecnico-distsys/T_50-project.git
  
 ```
 cd uddi-naming
-mvn clean install
+mvn install
 ```
  
 ```
 cd supplier-ws
-mvn clean install
+mvn compile exec:java
+
 ```
  
 ```
 cd supplier-ws-cli
-mvn clean install
-```
-```
-cd cc-ws-cli
-mvn clean install
+mvn install
+
 ```
 
 ```
 cd mediator-ws
-mvn clean install
+mvn compile exec:java
 ``` 
  
 ```
 cd mediator-ws-cli
-mvn clean install -DskipTests
+mvn install -DskipTests
+```
+
+```
+cd cc-ws-cli
+mvn install
 ```
 
 
@@ -91,7 +94,13 @@ Correr Aplicação
        O resultado final do ping deverá ser impresso nesta consola.
 
 Correr testes de integração 
+       ```
+       cd supplier-ws
+       mvn compile exec:java
+       ```
+       ```
        cd mediator-ws-cli
        mvn verify
+       ```
 
 **FIM**
