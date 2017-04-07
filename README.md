@@ -77,30 +77,32 @@ mvn install
 ```
 
 
-Correr Aplicação
+[5]Correr Aplicação
 
    Abrir consola para Fornecedor 1:
-       cd supplier-ws
+       
+							cd supplier-ws
        mvn exec:java
    Abrir consola para Fornecedor 2:
-       cd supplier-ws
+       
+							cd supplier-ws
        mvn exec:java -Dws.i=2
    Abrir consola para Mediador:
-       cd mediator-ws
+       
+							cd mediator-ws
        mvn exec:java
    Finalmente, na consola para o cliente do Mediador:
-       cd mediator-ws-cli
+       
+							cd mediator-ws-cli
        mvn exec:java
        O resultado final do ping deverá ser impresso nesta consola.
 
 Correr testes de integração 
-       ```
+       
        cd supplier-ws
-       mvn compile exec:java
-       ```
-       ```
+       mvn compile exec:java   
+       
        cd mediator-ws-cli
        mvn verify
-       ```
 
 **FIM**
