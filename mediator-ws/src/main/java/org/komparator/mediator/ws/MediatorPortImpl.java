@@ -23,13 +23,16 @@ public class MediatorPortImpl implements MediatorPortType {
 	// end point manager
 	private MediatorEndpointManager endpointManager;
 	private Map<String, SupplierClient> suppliers;
+	private Map<String, CartView> carts;
+
 
 	public MediatorPortImpl() {
 	}
 
 	public MediatorPortImpl(MediatorEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
-		this.suppliers = new HashMap<>();
+		this.suppliers = new HashMap<String, SupplierClient>();
+		this.carts = new HashMap<String, CartView>();
 	}
 
 	public MediatorEndpointManager getEndpointManager() {
@@ -121,6 +124,10 @@ public class MediatorPortImpl implements MediatorPortType {
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
 		// TODO Auto-generated method stub
+		if(carts.containsKey(cartId)){
+	
+		}
+		
 		
 	}
 	
