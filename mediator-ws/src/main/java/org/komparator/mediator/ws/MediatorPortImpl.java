@@ -35,7 +35,6 @@ public class MediatorPortImpl implements MediatorPortType {
 	private List<ShoppingResultView> shopHistory;
 	
 	private int shopId=0;
-	private Map<String, CartView> ;
 
 	public MediatorPortImpl() {
 	}
@@ -178,7 +177,7 @@ public class MediatorPortImpl implements MediatorPortType {
 			} catch (BadProductId_Exception e) {
 				throwInvalidItemId_Exception("Item does not exist");
 			}
-			
+
 		} else{	// criar cart caso não exista
 			cart = new CartView();
 			try {
@@ -200,6 +199,12 @@ public class MediatorPortImpl implements MediatorPortType {
 	@Override
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
+
+		if (cartId == null || cartId.trim().length() == 0) {
+			throwInvalidCartId_Exception("Cart cannot be null or empty");
+		} else if (creditCardNr == null || creditCardNr.trim().length() == 0) {
+			throwInvalidCreditCard_Exception("Credit Card cannot be null or empty");
+		}
 		
 		updateSuppliers();
 		CartView cart = carts.get(cartId);
@@ -210,28 +215,28 @@ public class MediatorPortImpl implements MediatorPortType {
 		List<CartItemView> drop = new ArrayList<CartItemView>();
 		List<CartItemView> purch = new ArrayList<CartItemView>();
 		int price = 0;
- 
-        if(cart.getItems().isEmpty()) {
-            throwEmptyCart_Exception("Cart is empty");
-        }
- 
-        try {
-            UDDINaming uddiNaming = endpointManager.getUddiNaming();
-            String creditCardURL = uddiNaming.lookup("CreditCard");
- 
-            CreditCardClient cardClient = new CreditCardClient(endpointManager.getWsName());
-            if(!cardClient.validateNumber(creditCardNr)) {
-            	throwInvalidCreditCard_Exception("Invalid card Exception");
-            }
- 
-        } catch (UDDINamingException | CreditCardClientException e) {
-            System.out.println("Exception thrown.");
-        }
-        for(CartItemView cartItem : cart.getItems()){
-        	supplierName = cartItem.getItem().getItemId().getSupplierId();
-        	productId = cartItem.getItem().getItemId().getProductId();
-        	qty = cartItem.getQuantity();
-        	
+
+		if(cart.getItems().isEmpty()) {
+			throwEmptyCart_Exception("Cart is empty");
+		}
+
+		try {
+			UDDINaming uddiNaming = endpointManager.getUddiNaming();
+			String creditCardURL = uddiNaming.lookup("CreditCard");
+
+			CreditCardClient cardClient = new CreditCardClient(endpointManager.getWsName());
+			if(!cardClient.validateNumber(creditCardNr)) {
+				throwInvalidCreditCard_Exception("Invalid card Exception");
+			}
+
+		} catch (UDDINamingException | CreditCardClientException e) {
+			System.out.println("Exception thrown.");
+		}
+		for(CartItemView cartItem : cart.getItems()){
+			supplierName = cartItem.getItem().getItemId().getSupplierId();
+			productId = cartItem.getItem().getItemId().getProductId();
+			qty = cartItem.getQuantity();
+
 			SupplierClient client = suppliers.get(supplierName);
 			
 			try {
@@ -261,11 +266,8 @@ public class MediatorPortImpl implements MediatorPortType {
         
 		return shopRes;
 	}
-	
-    
-	// Auxiliary operations --------------------------------------------------	
-	
-    // TODO
+
+	// Auxiliary operations --------------------------------------------------
 	
 	@Override
 	public String ping(String arg0) {
@@ -290,12 +292,10 @@ public class MediatorPortImpl implements MediatorPortType {
 	
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
 		try { 
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
 				client.clear();
-				
 			}
 		} catch (Exception e){
 			System.out.println("Error connecting to suppliers...");
@@ -309,7 +309,7 @@ public class MediatorPortImpl implements MediatorPortType {
 	}
 
 	@Override
-	public List<ShoppingResultView> shopHistory() {		
+	public List<ShoppingResultView> shopHistory() {
 		return shopHistory;
 	}
 
@@ -335,7 +335,6 @@ public class MediatorPortImpl implements MediatorPortType {
 		try {
 			product = client.getProduct(itemId.getProductId());
 		} catch (BadProductId_Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -358,9 +357,9 @@ public class MediatorPortImpl implements MediatorPortType {
  
     /** Helper method to throw new InvalidCreditCard exception */
     private void throwInvalidCartId_Exception(final String message) throws InvalidCartId_Exception {
-        InvalidCreditCard faultInfo = new InvalidCreditCard();
+        InvalidCartId faultInfo = new InvalidCartId();
         faultInfo.message = message;
-        throw new InvalidCreditCard_Exception(message, faultInfo);
+        throw new InvalidCartId_Exception(message, faultInfo);
     }
     
     /** Helper method to throw new InvalidCreditCard exception */
