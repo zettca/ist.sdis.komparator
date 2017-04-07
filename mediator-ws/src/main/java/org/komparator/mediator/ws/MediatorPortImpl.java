@@ -1,5 +1,9 @@
 package org.komparator.mediator.ws;
 
+import org.komparator.supplier.ws.cli.SupplierClient;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+
+import java.util.Collection;
 import java.util.List;
 
 import javax.jws.WebService;
@@ -17,12 +21,34 @@ public class MediatorPortImpl implements MediatorPortType {
 
 	// end point manager
 	private MediatorEndpointManager endpointManager;
+	private Collection<String> suppliers;
+
+	public MediatorPortImpl() {
+	}
 
 	public MediatorPortImpl(MediatorEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
 	}
 
+	public MediatorEndpointManager getEndpointManager() {
+		return endpointManager;
+	}
 
+	public void setEndpointManager(MediatorEndpointManager endpointManager) {
+		this.endpointManager = endpointManager;
+	}
+
+	private void findSuppliers() {
+		try {
+			UDDINaming uddiNaming = endpointManager.getUddiNaming();
+			suppliers = uddiNaming.list("T50_Supplier%");
+			System.out.println("Found Suppliers:");
+			System.out.println(suppliers);
+		} catch (Exception e) {
+			suppliers.clear();
+			System.out.println("Error finding suppliers");
+		}
+	}
 
 	// Main operations -------------------------------------------------------
 
@@ -60,8 +86,23 @@ public class MediatorPortImpl implements MediatorPortType {
 	
 	@Override
 	public String ping(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+		StringBuilder builder = new StringBuilder();
+		findSuppliers();
+
+		builder.append("Hello from Mediator!\n"); // Ping self back
+
+		try { // Ping all Suppliers
+			for (String supplierURL : this.suppliers) {
+				SupplierClient client = new SupplierClient(supplierURL);
+				String res = client.ping(arg0);
+				builder.append(res + "\n");
+			}
+		} catch (Exception e){
+			System.out.println("Error connecting to suppliers...");
+			return "Error pinging";
+		}
+
+		return builder.toString();
 	}
 	
 	@Override

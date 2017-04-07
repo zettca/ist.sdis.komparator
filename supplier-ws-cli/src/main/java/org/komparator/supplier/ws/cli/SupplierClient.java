@@ -35,7 +35,7 @@ public class SupplierClient implements SupplierPortType {
 	/** WS end point address */
 	private String wsURL = null; // default value is defined inside WSDL
 	private String uddiURL = null;
-	private String serviceName = null; // service name to contact
+	private String wsName = null; // service name to contact
 
 	public String getWsURL() {
 		return wsURL;
@@ -54,35 +54,40 @@ public class SupplierClient implements SupplierPortType {
 
 	/** constructor with provided web service URL */
 	public SupplierClient(String wsURL) throws SupplierClientException {
-		System.out.println("3333333333333!");
-
 		this.wsURL = wsURL;
-		createStub2();
+		createStub();
 	}
 
-	public SupplierClient(String uddiURL, String serviceName) throws SupplierClientException {
+	public SupplierClient(String uddiURL, String wsName) throws SupplierClientException {
 		this.uddiURL = uddiURL;
-		this.serviceName = serviceName;
+		this.wsName = wsName;
+		uddiLookup();
 		createStub();
+	}
+
+	private void uddiLookup() throws SupplierClientException {
+		try {
+			if (verbose)
+				System.out.printf("Contacting UDDI at %s%n", uddiURL);
+			UDDINaming uddiNaming = new UDDINaming(uddiURL);
+
+			if (verbose)
+				System.out.printf("Looking for '%s'%n", wsName);
+			wsURL = uddiNaming.lookup(wsName);
+
+		} catch (Exception e) {
+			String msg = String.format("Client failed lookup on UDDI at %s!", uddiURL);
+			throw new SupplierClientException(msg, e);
+		}
+
+		if (wsURL == null) {
+			String msg = String.format("Service with name %s not found on UDDI at %s", wsName, uddiURL);
+			throw new SupplierClientException(msg);
+		}
 	}
 
 	/** Stub creation and configuration */
 	private void createStub() {
-		String endpointAddress = null;
-		try{
-			System.out.printf("Contacting UDDI at %s%n", uddiURL);
-			UDDINaming uddiNaming = new UDDINaming(uddiURL);
-
-			System.out.printf("Looking for '%s'%n", serviceName);
-			endpointAddress = uddiNaming.lookup(serviceName);
-		} catch (Exception e){
-			endpointAddress = null;
-			if (verbose) {
-				System.out.printf("Caught exception when starting: %s%n", e);
-				e.printStackTrace();
-			}
-		}
-
 		if (verbose) {
 			System.out.println("Creating stub ...");
 		}
@@ -90,44 +95,15 @@ public class SupplierClient implements SupplierPortType {
 		service = new SupplierService();
 		port = service.getSupplierPort();
 
-		if (endpointAddress != null) {
+		if (wsURL != null) {
 			if (verbose)
 				System.out.println("Setting endpoint address ...");
 			BindingProvider bindingProvider = (BindingProvider) port;
 			Map<String, Object> requestContext = bindingProvider.getRequestContext();
-			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
+			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
 		}
 	}
-	
-	/** Stub creation and configuration */
-    private void createStub2() {
-        if (verbose){
-            System.out.println("Creating stub ...");
-        }
-		System.out.println("3333333333333!");
 
-        service = new SupplierService();
-        
-		System.out.println("4444444444444!");
-
-        port = service.getSupplierPort();
-        
-		System.out.println("55555555555555!");
-
- 
-        if (wsURL != null) {
-            if (verbose)
-                System.out.println("Setting endpoint address ...");
-            
-			System.out.println("666666666666666!");
-
-            BindingProvider bindingProvider = (BindingProvider) port;
-            Map<String, Object> requestContext = bindingProvider.getRequestContext();
-            requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
-        }
-    }	
-	
-	
 
 	// remote invocation methods ----------------------------------------------
 

@@ -111,6 +111,7 @@ public class SupplierPortImpl implements SupplierPortType {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Hello ").append(name);
 		builder.append(" from ").append(wsName);
+		System.out.println("Ping request. Pinging back with: " + builder.toString());
 		return builder.toString();
 	}
 
