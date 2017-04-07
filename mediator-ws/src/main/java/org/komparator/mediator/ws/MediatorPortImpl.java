@@ -1,5 +1,6 @@
 package org.komparator.mediator.ws;
 
+import org.komparator.supplier.ws.BadProductId_Exception;
 import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.cli.SupplierClient;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
@@ -62,7 +63,8 @@ public class MediatorPortImpl implements MediatorPortType {
 
 	
 	// Main operations -------------------------------------------------------
-
+	
+	
 	@Override
 	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
 		List<ItemView> items = new ArrayList<>();
@@ -71,13 +73,7 @@ public class MediatorPortImpl implements MediatorPortType {
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
 				ProductView product = client.getProduct(productId);
-				ItemView item = new ItemView();
-				item.setDesc(product.getDesc());
-				item.setPrice(product.getPrice());
-				ItemIdView itemId = new ItemIdView();
-				itemId.setProductId(product.getId());
-				itemId.setSupplierId(clientName);
-				item.setItemId(itemId);
+				ItemView item = productViewToItemView(clientName,product);
 				items.add(item);
 			}
 		} catch (Exception e){
@@ -95,13 +91,7 @@ public class MediatorPortImpl implements MediatorPortType {
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
 				for(ProductView product : client.searchProducts(descText)){
-					ItemView item = new ItemView();
-					item.setDesc(product.getDesc());
-					item.setPrice(product.getPrice());
-					ItemIdView itemId = new ItemIdView();
-					itemId.setProductId(product.getId());
-					itemId.setSupplierId(clientName);
-					item.setItemId(itemId);
+					ItemView item = productViewToItemView(clientName,product);
 					items.add(item);
 				}
 			}
@@ -125,7 +115,13 @@ public class MediatorPortImpl implements MediatorPortType {
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
 		// TODO Auto-generated method stub
 		if(carts.containsKey(cartId)){
-	
+			CartItemView cartItem = itemViewToCartItemView(itemId, itemQty);
+			if(carts.get(cartId).getItems().contains(cartItem)){
+				for(CartItemView i : carts.get(cartId).getItems()){
+					
+				}
+			}
+			carts.get(cartId).items.add(cartItem);
 		}
 		
 		
@@ -195,6 +191,33 @@ public class MediatorPortImpl implements MediatorPortType {
 	// View helpers -----------------------------------------------------
 	
     // TODO
+	public ItemView productViewToItemView(String clientName, ProductView product){
+		ItemView item = new ItemView();
+		item.setDesc(product.getDesc());
+		item.setPrice(product.getPrice());
+		ItemIdView itemId = new ItemIdView();
+		itemId.setProductId(product.getId());
+		itemId.setSupplierId(clientName);
+		item.setItemId(itemId);
+		return item;
+	}
+	
+	public CartItemView itemViewToCartItemView(ItemIdView itemId, int quantidade){
+		CartItemView cartItem = new CartItemView();
+		SupplierClient client = suppliers.get(itemId.getSupplierId());
+		ProductView product = new ProductView();
+		try {
+			product = client.getProduct(itemId.getProductId());
+		} catch (BadProductId_Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		ItemView item = productViewToItemView(itemId.getSupplierId(), product);
+		cartItem.setItem(item);
+		cartItem.setQuantity(quantidade);
+		return cartItem;
+	}
 
     
 	// Exception helpers -----------------------------------------------------
