@@ -93,6 +93,15 @@ public class MediatorPortImpl implements MediatorPortType {
 			System.out.println("Error connecting to suppliers...");
 		}
 
+		if (items.size() > 0) {
+			Collections.sort(items, new Comparator<ItemView>() {
+				@Override
+				public int compare(final ItemView item1, final ItemView item2) {
+					return item2.getPrice() - item1.getPrice();
+				}
+			});
+		}
+
 		return items;
 	}
 
@@ -115,12 +124,12 @@ public class MediatorPortImpl implements MediatorPortType {
 			System.out.println("Error connecting to suppliers...");
 		}
 
-		if (items.size() > 0) {
+		if (items.size() > 1) {
 			Collections.sort(items, new Comparator<ItemView>() {
 				@Override
 				public int compare(final ItemView item1, final ItemView item2) {
 					int res = item1.getItemId().toString().compareTo(item2.getItemId().toString());
-					return (res == 0) ? item1.getPrice() - item2.getPrice() : res;
+					return (res == 0) ? item2.getPrice() - item1.getPrice() : res;
 				}
 			});
 		}
@@ -274,8 +283,7 @@ public class MediatorPortImpl implements MediatorPortType {
 				builder.append(res + "\n");
 			}
 		} catch (Exception e){
-			System.out.println("Error connecting to suppliers...");
-			return "Error pinging";
+			e.getMessage();
 		}
 
 		return builder.toString();
@@ -289,7 +297,7 @@ public class MediatorPortImpl implements MediatorPortType {
 				client.clear();
 			}
 		} catch (Exception e){
-			System.out.println("Error connecting to suppliers...");
+			System.out.println("Error clearing suppliers...");
 		}
 		suppliers.clear();
 	}
