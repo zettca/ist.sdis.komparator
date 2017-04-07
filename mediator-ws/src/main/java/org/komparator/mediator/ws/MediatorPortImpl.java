@@ -3,10 +3,9 @@ package org.komparator.mediator.ws;
 import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.cli.SupplierClient;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import javax.jws.WebService;
 
@@ -23,14 +22,14 @@ public class MediatorPortImpl implements MediatorPortType {
 
 	// end point manager
 	private MediatorEndpointManager endpointManager;
-	private List<SupplierClient> suppliers;
+	private Map<String, SupplierClient> suppliers;
 
 	public MediatorPortImpl() {
 	}
 
 	public MediatorPortImpl(MediatorEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
-		this.suppliers = new ArrayList<SupplierClient>();
+		this.suppliers = new HashMap<>();
 	}
 
 	public MediatorEndpointManager getEndpointManager() {
@@ -44,14 +43,14 @@ public class MediatorPortImpl implements MediatorPortType {
 	private void updateSuppliers() {
 		try {
 			UDDINaming uddiNaming = endpointManager.getUddiNaming();
-			Collection<String> supplierURLs = uddiNaming.list("T50_Supplier%");
+			Collection<UDDIRecord> supplierRecords = uddiNaming.listRecords("T50_Supplier%");
 			suppliers.clear();
-			for (String supplierURL : supplierURLs) {
-				SupplierClient client = new SupplierClient(supplierURL);
-				suppliers.add(client);
+			for (UDDIRecord supplierRecord : supplierRecords) {
+				SupplierClient client = new SupplierClient(supplierRecord.getUrl());
+				suppliers.put(supplierRecord.getOrgName(), client);
 			}
 			System.out.println("Found Suppliers:");
-			System.out.println(suppliers);
+			System.out.println(suppliers.keySet());
 		} catch (Exception e) {
 			suppliers.clear();
 			System.out.println("Error updating suppliers");
@@ -66,14 +65,15 @@ public class MediatorPortImpl implements MediatorPortType {
 		List<ItemView> items = new ArrayList<>();
 
 		try {
-			for (SupplierClient client : this.suppliers) {
+			for (String clientName : suppliers.keySet()) {
+				SupplierClient client = suppliers.get(clientName);
 				ProductView product = client.getProduct(productId);
 				ItemView item = new ItemView();
 				item.setDesc(product.getDesc());
 				item.setPrice(product.getPrice());
 				ItemIdView itemId = new ItemIdView();
 				itemId.setProductId(product.getId());
-				itemId.setSupplierId(""); // TODO what is this?
+				itemId.setSupplierId(clientName);
 				item.setItemId(itemId);
 				items.add(item);
 			}
@@ -117,7 +117,8 @@ public class MediatorPortImpl implements MediatorPortType {
 		builder.append("Hello from Mediator!\n"); // Ping self back
 
 		try { // Ping all Suppliers
-			for (SupplierClient client : this.suppliers) {
+			for (String clientName : suppliers.keySet()) {
+				SupplierClient client = suppliers.get(clientName);
 				String res = client.ping(arg0);
 				builder.append(res + "\n");
 			}
