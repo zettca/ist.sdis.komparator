@@ -1,5 +1,6 @@
 package org.komparator.mediator.ws.it;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
@@ -10,14 +11,16 @@ import org.junit.Test;
  */
 public class PingIT extends BaseIT {
 
-    // tests
-    // assertEquals(expected, actual);
-
-    // public String ping(String x)
-
     @Test
     public void pingEmptyTest() {
         assertNotNull(mediatorClient.ping("test"));
+    }
+
+    @Test
+    public void pingLinesTest() {
+        String res = mediatorClient.ping("testing");
+        String[] lines = res.split("\n");
+        assertEquals(3, lines.length);
     }
 
 }
