@@ -5,17 +5,13 @@ import org.komparator.supplier.ws.BadQuantity_Exception;
 import org.komparator.supplier.ws.InsufficientQuantity_Exception;
 import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.cli.SupplierClient;
-
 import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClient;
 import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClientException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
-import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
 
-
-import java.util.*;
-
 import javax.jws.WebService;
+import java.util.*;
 
 @WebService(
 		endpointInterface = "org.komparator.mediator.ws.MediatorPortType", 
@@ -44,6 +40,8 @@ public class MediatorPortImpl implements MediatorPortType {
 		this.suppliers = new HashMap<String, SupplierClient>();
 		this.carts = new HashMap<String, CartView>();
 		this.shopHistory = new ArrayList<ShoppingResultView>();
+
+		updateSuppliers();
 	}
 
 	public MediatorEndpointManager getEndpointManager() {
@@ -63,8 +61,7 @@ public class MediatorPortImpl implements MediatorPortType {
 				SupplierClient client = new SupplierClient(supplierRecord.getUrl());
 				suppliers.put(supplierRecord.getOrgName(), client);
 			}
-			System.out.println("Found Suppliers:");
-			System.out.println(suppliers.keySet());
+			System.out.println("Found Suppliers: " + suppliers.keySet().toString());
 		} catch (Exception e) {
 			suppliers.clear();
 			System.out.println("Error updating suppliers");
@@ -81,6 +78,7 @@ public class MediatorPortImpl implements MediatorPortType {
 			throwInvalidItemId_Exception("Item ID cannot be null or empty");
 		}
 
+		updateSuppliers();
 		List<ItemView> items = new ArrayList<>();
 		try {
 			for (String clientName : suppliers.keySet()) {
@@ -93,13 +91,8 @@ public class MediatorPortImpl implements MediatorPortType {
 			System.out.println("Error connecting to suppliers...");
 		}
 
-		if (items.size() > 0) {
-			Collections.sort(items, new Comparator<ItemView>() {
-				@Override
-				public int compare(final ItemView item1, final ItemView item2) {
-					return item2.getPrice() - item1.getPrice();
-				}
-			});
+		if (items.size() > 1) {
+			Collections.sort(items, (item1, item2) -> item2.getPrice() - item1.getPrice());
 		}
 
 		return items;
@@ -110,7 +103,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		if (descText == null || descText.trim().length() == 0) {
 			throwInvalidText_Exception("Search query cannot be null or empty");
 		}
-
+		updateSuppliers();
 		List<ItemView> items = new ArrayList<>();
 		try {
 			for (String clientName : suppliers.keySet()) {
@@ -125,12 +118,9 @@ public class MediatorPortImpl implements MediatorPortType {
 		}
 
 		if (items.size() > 1) {
-			Collections.sort(items, new Comparator<ItemView>() {
-				@Override
-				public int compare(final ItemView item1, final ItemView item2) {
-					int res = item1.getItemId().toString().compareTo(item2.getItemId().toString());
-					return (res == 0) ? item2.getPrice() - item1.getPrice() : res;
-				}
+			Collections.sort(items, (item1, item2) -> {
+				int res = item1.getItemId().toString().compareTo(item2.getItemId().toString());
+				return (res == 0) ? item2.getPrice() - item1.getPrice() : res;
 			});
 		}
 
@@ -148,7 +138,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		} else if (itemQty <= 0) {
 			throwInvalidQuantity_Exception("Quantity must be positive");
 		}
-		
+
 		updateSuppliers();
 		CartItemView cartItem = itemViewToCartItemView(itemId, itemQty);
 		// Procura o card, ou cria um novo se não existir
@@ -214,7 +204,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		} else if (creditCardNr == null || creditCardNr.trim().length() == 0) {
 			throwInvalidCreditCard_Exception("Credit Card cannot be null or empty");
 		}
-		
+
 		updateSuppliers();
 		CartView cart = carts.get(cartId);
 		String supplierName, productId;
@@ -272,10 +262,10 @@ public class MediatorPortImpl implements MediatorPortType {
 	@Override
 	public String ping(String arg0) {
 		StringBuilder builder = new StringBuilder();
-		updateSuppliers();
 
 		builder.append("Hello from Mediator!\n"); // Ping self back
 
+		updateSuppliers();
 		try { // Ping all Suppliers
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
@@ -300,6 +290,8 @@ public class MediatorPortImpl implements MediatorPortType {
 			System.out.println("Error clearing suppliers...");
 		}
 		suppliers.clear();
+		carts.clear();
+		shopHistory.clear();
 	}
 	
 	@Override

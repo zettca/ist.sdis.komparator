@@ -16,11 +16,13 @@ public class BaseIT {
 
 	private static final String TEST_PROP_FILE = "/test.properties";
 	private static final String uddiURL = "http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/";
-	protected static Properties testProps;
+	static Properties testProps;
 
-	protected static MediatorClient mediatorClient;
-	protected static SupplierClient supplierAll;
-	protected static SupplierClient supplierApple;
+	static MediatorClient mediatorClient;
+	static SupplierClient supplierAll;
+	static SupplierClient supplierApple;
+
+	protected static List<ProductView> productList = new ArrayList<>();
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
@@ -57,7 +59,6 @@ public class BaseIT {
 		supplierAll = new SupplierClient(uddiURL, "T50_Supplier1");
 		supplierApple = new SupplierClient(uddiURL, "T50_Supplier2");
 
-		List<ProductView> products = new ArrayList<>();
 		List<ProductView> appleProducts = new ArrayList<>();
 
 		ProductView product1 = new ProductView();
@@ -68,48 +69,48 @@ public class BaseIT {
 		ProductView product6 = new ProductView();
 
 		product1.setId("iPhone6");
-		product1.setDesc("SmartPhone Apple iPhone 6");
+		product1.setDesc("Apple iPhone 6");
 		product1.setPrice(500);
 		product1.setQuantity(30);
-		products.add(product1);
+		productList.add(product1);
 		appleProducts.add(product1);
 
 		product2.setId("iPhone6S");
-		product2.setDesc("SmartPhone Apple iPhone 6S");
+		product2.setDesc("Apple iPhone 6S");
 		product2.setPrice(600);
 		product2.setQuantity(20);
-		products.add(product2);
+		productList.add(product2);
 		appleProducts.add(product2);
 
 		product3.setId("iPhone7+");
-		product3.setDesc("SmartPhone Apple iPhone 7 Plus");
+		product3.setDesc("Apple iPhone 7 Plus");
 		product3.setPrice(700);
 		product3.setQuantity(20);
-		products.add(product3);
+		productList.add(product3);
 		appleProducts.add(product3);
 
 		/* === Brand Separator? === */
 
-		product4.setId("Pixel");
-		product4.setDesc("SmartPhone Google Pixel");
-		product4.setPrice(650);
-		product4.setQuantity(1);
-		products.add(product4);
+		product4.setId("PixelC");
+		product4.setDesc("Google Pixel C");
+		product4.setPrice(1200);
+		product4.setQuantity(40);
+		productList.add(product4);
 
-		product5.setId("PixelXL");
-		product5.setDesc("SmartPhone Google Pixel XL");
-		product5.setPrice(750);
-		product5.setQuantity(2);
-		products.add(product5);
+		product5.setId("Pixel");
+		product5.setDesc("Google Pixel");
+		product5.setPrice(650);
+		product5.setQuantity(10);
+		productList.add(product5);
 
-		product6.setId("PixelC");
-		product6.setDesc("SmartPhone Google Pixel C");
-		product6.setPrice(1200);
-		product6.setQuantity(4);
-		products.add(product6);
+		product6.setId("PixelXL");
+		product6.setDesc("Google Pixel XL");
+		product6.setPrice(750);
+		product6.setQuantity(20);
+		productList.add(product6);
 
 		try {
-			for (ProductView product : products) {
+			for (ProductView product : productList) {
 				supplierAll.createProduct(product);
 			}
 
