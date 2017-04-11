@@ -16,7 +16,7 @@ Número | Nome | Email
 * Linux
 
 1. Configurar o Servidor de Nomes (UDDI)
-   1. Criar um ficheiro [settings.xml](disciplinas.tecnico.ulisboa.pt/leic-sod/2016-2017/labs/06-ws2/settings.xml)
+   1. Criar um ficheiro [settings.xml](http://disciplinas.tecnico.ulisboa.pt/leic-sod/2016-2017/labs/06-ws2/settings.xml)
    2. Colocar o ficheiro na HOME do Maven: `mv settings.xml ~/.m2/`
    3. Substituir `user:pass` por `t50:WkyodoJT`
      
