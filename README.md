@@ -12,24 +12,20 @@ Número | Nome | Email
 ## Instruções de instalação
 
 
-###0. Iniciar sistema operativo
-
+0. Iniciar sistema operativo
 * Linux
 
-###1. Configurar o Servidor de Nomes (UDDI)
-
+1. Configurar o Servidor de Nomes (UDDI)
    1. Criar um ficheiro [settings.xml](disciplinas.tecnico.ulisboa.pt/leic-sod/2016-2017/labs/06-ws2/settings.xml)
    2. Colocar o ficheiro na HOME do Maven: `mv settings.xml ~/.m2/`
    3. Substituir `user:pass` por `t50:WkyodoJT`
      
-###2. Obter código fonte do projeto (versão entregue)
-
+2. Obter código fonte do projeto (versão entregue)
 ```bash
 git clone -b SD_P2 https://github.com/tecnico-distsys/T_50-project.git
 ``` 
  
-###3. Instalar módulos de bibliotecas auxiliares e alguns clientes com dependências
-
+3. Instalar módulos de bibliotecas auxiliares e alguns clientes com dependências
 ```
 cd uddi-naming
 mvn install
@@ -87,7 +83,6 @@ cd mediator-ws-cli
 mvn exec:java
 ```
 O resultado final do ping deverá ser impresso nesta consola.
-
 
 ## Correr testes de integração 
 ```
