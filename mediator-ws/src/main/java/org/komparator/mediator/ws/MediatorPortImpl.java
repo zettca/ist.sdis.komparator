@@ -63,8 +63,8 @@ public class MediatorPortImpl implements MediatorPortType {
 			}
 			System.out.println("Found Suppliers: " + suppliers.keySet().toString());
 		} catch (Exception e) {
-			suppliers.clear();
-			System.out.println("Error updating suppliers");
+			//suppliers.clear();
+			System.out.println("Error updating suppliers: " + e.getMessage());
 		}
 	}
 
@@ -84,17 +84,15 @@ public class MediatorPortImpl implements MediatorPortType {
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
 				ProductView product = client.getProduct(productId);
-				ItemView item = productViewToItemView(clientName,product);
+				ItemView item = productViewToItemView(product, clientName);
 				items.add(item);
 			}
 		} catch (Exception e){
 			System.out.println("Error connecting to suppliers...");
+			System.out.println(e.getMessage());
 		}
 
-		if (items.size() > 1) {
-			Collections.sort(items, (item1, item2) -> item2.getPrice() - item1.getPrice());
-		}
-
+		items.sort(Comparator.comparing(ItemView::getPrice));
 		return items;
 	}
 
@@ -109,20 +107,19 @@ public class MediatorPortImpl implements MediatorPortType {
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
 				for(ProductView product : client.searchProducts(descText)){
-					ItemView item = productViewToItemView(clientName,product);
+					ItemView item = productViewToItemView(product, clientName);
 					items.add(item);
 				}
 			}
 		} catch (Exception e){
 			System.out.println("Error connecting to suppliers...");
+			System.out.println(e.getMessage());
 		}
 
-		if (items.size() > 1) {
-			Collections.sort(items, (item1, item2) -> {
-				int res = item1.getItemId().toString().compareTo(item2.getItemId().toString());
-				return (res == 0) ? item2.getPrice() - item1.getPrice() : res;
-			});
-		}
+		items.sort((item1, item2) -> {
+			int res = item1.getItemId().getProductId().compareTo(item2.getItemId().getProductId());
+			return (res == 0) ? Integer.compare(item1.getPrice(), item2.getPrice()) : res;
+		});
 
 		return items;
 	}
@@ -306,20 +303,22 @@ public class MediatorPortImpl implements MediatorPortType {
 
 	
 	// View helpers -----------------------------------------------------
-	
 
-	public ItemView productViewToItemView(String clientName, ProductView product){
+
+	private ItemView productViewToItemView(ProductView product, String clientName) {
 		ItemView item = new ItemView();
 		item.setDesc(product.getDesc());
 		item.setPrice(product.getPrice());
+
 		ItemIdView itemId = new ItemIdView();
 		itemId.setProductId(product.getId());
 		itemId.setSupplierId(clientName);
 		item.setItemId(itemId);
+
 		return item;
 	}
-	
-	public CartItemView itemViewToCartItemView(ItemIdView itemId, int quantidade){
+
+	private CartItemView itemViewToCartItemView(ItemIdView itemId, int quantidade) {
 		CartItemView cartItem = new CartItemView();
 		SupplierClient client = suppliers.get(itemId.getSupplierId());
 		ProductView product = new ProductView();
@@ -328,8 +327,8 @@ public class MediatorPortImpl implements MediatorPortType {
 		} catch (BadProductId_Exception e) {
 			e.printStackTrace();
 		}
-		
-		ItemView item = productViewToItemView(itemId.getSupplierId(), product);
+
+		ItemView item = productViewToItemView(product, itemId.getSupplierId());
 		cartItem.setItem(item);
 		cartItem.setQuantity(quantidade);
 		return cartItem;
