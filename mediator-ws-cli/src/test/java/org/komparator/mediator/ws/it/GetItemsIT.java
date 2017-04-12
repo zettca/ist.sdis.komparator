@@ -1,11 +1,11 @@
 package org.komparator.mediator.ws.it;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.komparator.mediator.ws.InvalidItemId_Exception;
 import org.komparator.mediator.ws.ItemView;
+
+import java.util.List;
 
 public class GetItemsIT extends BaseIT{
 
@@ -58,10 +58,25 @@ public class GetItemsIT extends BaseIT{
   /* ===== Test order ===== */
 
   @Test
-  public void getItemsSortedByPriceTest() throws InvalidItemId_Exception {
+  public void getItemsExactSortedByPriceTest() throws InvalidItemId_Exception {
     List<ItemView> res = mediatorClient.getItems("iPhone7+");
     Assert.assertEquals(2, res.size());
-    Assert.assertTrue(res.get(0).getPrice() < res.get(1).getPrice());
+
+    Assert.assertEquals("iPhone7+", res.get(0).getItemId().getProductId());
+    Assert.assertEquals("T50_Supplier1", res.get(0).getItemId().getSupplierId());
+
+    Assert.assertEquals("iPhone7+", res.get(1).getItemId().getProductId());
+    Assert.assertEquals("T50_Supplier2", res.get(1).getItemId().getSupplierId());
+  }
+
+  @Test
+  public void getItemsAllSortedByPriceTest() throws InvalidItemId_Exception {
+    List<ItemView> res = mediatorClient.getItems("iPhone6S");
+    Assert.assertEquals(2, res.size());
+
+    for (int i = 0; i < res.size() - 1; i++) {
+      Assert.assertTrue(res.get(i).getPrice() <= res.get(i + 1).getPrice());
+    }
   }
 
 }

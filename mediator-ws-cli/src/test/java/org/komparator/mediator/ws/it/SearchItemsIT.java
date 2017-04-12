@@ -3,7 +3,6 @@ package org.komparator.mediator.ws.it;
 import org.junit.Assert;
 import org.junit.Test;
 import org.komparator.mediator.ws.InvalidText_Exception;
-import org.komparator.mediator.ws.ItemIdView;
 import org.komparator.mediator.ws.ItemView;
 
 import java.util.List;
@@ -55,50 +54,51 @@ public class SearchItemsIT extends BaseIT {
     @Test
     public void searchItemsMatchSomeResultsTest() throws InvalidText_Exception {
         List<ItemView> res = mediatorClient.searchItems("iPhone 6");
-        Assert.assertEquals(2, res.size());
+        Assert.assertEquals(4, res.size());
     }
 
     /* ===== Test order ===== */
 
     @Test
-    public void searchItemsNamesSortedTest() throws InvalidText_Exception {
-        List<ItemView> res = mediatorClient.searchItems("iPhone 6");
+    public void searchItemsPricesSortedTest() throws InvalidText_Exception {
+        List<ItemView> res = mediatorClient.searchItems("iPhone 6S");
 
-        Assert.assertEquals("iPhone6", res.get(0).getItemId().getProductId());
+        Assert.assertEquals(2, res.size());
+
+        Assert.assertEquals("iPhone6S", res.get(0).getItemId().getProductId());
+        Assert.assertEquals("T50_Supplier1", res.get(0).getItemId().getSupplierId());
+
         Assert.assertEquals("iPhone6S", res.get(1).getItemId().getProductId());
+        Assert.assertEquals("T50_Supplier2", res.get(1).getItemId().getSupplierId());
     }
 
     @Test
-    public void searchItemsAllNamesSortedTest() throws InvalidText_Exception {
-        List<ItemView> res = mediatorClient.searchItems("iPhone");
-        ItemIdView itemIdView = null;
+    public void searchItemsNamesAndPricesSortedTest() throws InvalidText_Exception {
+        List<ItemView> res = mediatorClient.searchItems("iPhone 6");
 
-        Assert.assertEquals(6, res.size());
+        Assert.assertEquals(4, res.size());
+        Assert.assertTrue(isOrdered(res));
+    }
 
-        itemIdView = res.get(0).getItemId();
-        Assert.assertEquals("iPhone6", itemIdView.getProductId());
-        Assert.assertEquals("T50_Supplier1", itemIdView.getSupplierId());
+    @Test
+    public void searchItemsAllNamesAndPricesSortedTest() throws InvalidText_Exception {
+        List<ItemView> res = mediatorClient.searchItems("SmartPhone");
 
-        itemIdView = res.get(1).getItemId();
-        Assert.assertEquals("iPhone6", itemIdView.getProductId());
-        Assert.assertEquals("T50_Supplier2", itemIdView.getSupplierId());
+        Assert.assertEquals(9, res.size());
+        Assert.assertTrue(isOrdered(res));
+    }
 
-        itemIdView = res.get(2).getItemId();
-        Assert.assertEquals("iPhone6S", itemIdView.getProductId());
-        Assert.assertEquals("T50_Supplier1", itemIdView.getSupplierId());
 
-        itemIdView = res.get(3).getItemId();
-        Assert.assertEquals("iPhone6S", itemIdView.getProductId());
-        Assert.assertEquals("T50_Supplier2", itemIdView.getSupplierId());
-
-        itemIdView = res.get(4).getItemId();
-        Assert.assertEquals("iPhone7+", itemIdView.getProductId());
-        Assert.assertEquals("T50_Supplier1", itemIdView.getSupplierId());
-
-        itemIdView = res.get(5).getItemId();
-        Assert.assertEquals("iPhone7+", itemIdView.getProductId());
-        Assert.assertEquals("T50_Supplier2", itemIdView.getSupplierId());
-
+    private boolean isOrdered(List<ItemView> items) {
+        for (int i = 0; i < items.size() - 1; i++) {
+            int cmp = items.get(i).getItemId().getProductId().compareTo(items.get(i + 1).getItemId().getProductId());
+            if (cmp > 0) {
+                return false;
+            } else if (cmp == 0 && items.get(i).getPrice() > items.get(i + 1).getPrice()) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
