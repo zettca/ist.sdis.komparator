@@ -61,6 +61,7 @@ public class BaseIT {
 
 	@AfterClass
 	public static void oneTimeTearDown() {
+		mediatorClient.clear();
 	}
 
 	@Before
