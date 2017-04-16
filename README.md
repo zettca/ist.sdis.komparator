@@ -87,7 +87,7 @@ O resultado final do ping deverá ser impresso nesta consola.
 ## Correr testes de integração 
 ```
 cd supplier-ws
-mvn compile exec:java   
+mvn compile exec:java
 ```
 
 ```
