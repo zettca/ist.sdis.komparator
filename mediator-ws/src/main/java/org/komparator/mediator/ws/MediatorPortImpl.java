@@ -253,6 +253,7 @@ public class MediatorPortImpl implements MediatorPortType {
         
         shopHistory.add(shopRes);
         
+        carts.remove(cartId);
 		return shopRes;
 	}
 	
@@ -352,9 +353,9 @@ public class MediatorPortImpl implements MediatorPortType {
  
     /** Helper method to throw new InvalidCreditCard exception */
     private void throwInvalidCartId_Exception(final String message) throws InvalidCartId_Exception {
-        InvalidCreditCard faultInfo = new InvalidCreditCard();
+        InvalidCartId faultInfo = new InvalidCartId();
         faultInfo.message = message;
-        throw new InvalidCreditCard_Exception(message, faultInfo);
+        throw new InvalidCartId_Exception(message, faultInfo);
     }
     
     /** Helper method to throw new InvalidCreditCard exception */
