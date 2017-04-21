@@ -62,6 +62,11 @@ mvn install
 ```
 
 ```
+cd cc-ws-cli
+mvn install
+```
+
+```
 cd mediator-ws
 mvn compile exec:java
 ``` 
@@ -69,11 +74,6 @@ mvn compile exec:java
 ```
 cd mediator-ws-cli
 mvn install -DskipTests
-```
-
-```
-cd cc-ws-cli
-mvn install
 ```
 
 

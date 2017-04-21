@@ -112,11 +112,9 @@ public class MediatorClient implements MediatorPortType {
         port = service.getMediatorPort();
 
         if (wsURL != null) {
-            if (verbose)
-                System.out.println("Setting endpoint address ...");
+            if (verbose) System.out.println("Setting endpoint address...");
             BindingProvider bindingProvider = (BindingProvider) port;
-            Map<String, Object> requestContext = bindingProvider
-                    .getRequestContext();
+            Map<String, Object> requestContext = bindingProvider.getRequestContext();
             requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
         }
     }
