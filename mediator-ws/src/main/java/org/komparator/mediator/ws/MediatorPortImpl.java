@@ -247,7 +247,7 @@ public class MediatorPortImpl implements MediatorPortType {
 	
 	@Override
 	public void clear() {
-		try { 
+		try {
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
 				client.clear();
@@ -258,6 +258,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		suppliers.clear();
 		carts.clear();
 		shopHistory.clear();
+		updateSuppliers();
 	}
 	
 	@Override
