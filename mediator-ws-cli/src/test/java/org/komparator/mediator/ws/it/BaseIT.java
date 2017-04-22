@@ -1,7 +1,6 @@
 package org.komparator.mediator.ws.it;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.komparator.mediator.ws.cli.MediatorClient;
@@ -56,12 +55,6 @@ public class BaseIT {
 	public static void setupSupplierClients() throws SupplierClientException {
 		supplierAll = new SupplierClient(uddiURL, "T50_Supplier1");
 		supplierApple = new SupplierClient(uddiURL, "T50_Supplier2");
-	}
-
-
-	@AfterClass
-	public static void oneTimeTearDown() {
-		mediatorClient.clear();
 	}
 
 	@Before

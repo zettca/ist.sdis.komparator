@@ -1,9 +1,6 @@
 package org.komparator.mediator.ws;
 
-import org.komparator.supplier.ws.BadProductId_Exception;
-import org.komparator.supplier.ws.BadQuantity_Exception;
-import org.komparator.supplier.ws.InsufficientQuantity_Exception;
-import org.komparator.supplier.ws.ProductView;
+import org.komparator.supplier.ws.*;
 import org.komparator.supplier.ws.cli.SupplierClient;
 import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClient;
 import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClientException;
@@ -29,7 +26,7 @@ public class MediatorPortImpl implements MediatorPortType {
 	private Map<String, SupplierClient> suppliers;
 	private Map<String, CartView> carts;
 	private List<ShoppingResultView> shopHistory;
-	
+
 	private int shopId=0;
 
 	public MediatorPortImpl() {
@@ -80,12 +77,10 @@ public class MediatorPortImpl implements MediatorPortType {
 		try {
 			for (String clientName : suppliers.keySet()) {
 				ProductView product = suppliers.get(clientName).getProduct(productId);
-				ItemView item = productViewToItemView(product, clientName);
-				items.add(item);
+				if (product != null) items.add(productToItemView(product, clientName));
 			}
-		} catch (Exception e){
-			System.out.println("Error connecting to suppliers...");
-			System.out.println(e.getMessage());
+		} catch (BadProductId_Exception e) {
+			throwInvalidItemId_Exception(e.getMessage());
 		}
 
 		items.sort(Comparator.comparing(ItemView::getPrice));
@@ -97,19 +92,15 @@ public class MediatorPortImpl implements MediatorPortType {
 		if (descText == null || descText.trim().length() == 0) {
 			throwInvalidText_Exception("Search query cannot be null or empty");
 		}
-
 		List<ItemView> items = new ArrayList<>();
 		try {
 			for (String clientName : suppliers.keySet()) {
-				SupplierClient client = suppliers.get(clientName);
-				for (ProductView product : client.searchProducts(descText)) {
-					ItemView item = productViewToItemView(product, clientName);
-					items.add(item);
+				for (ProductView product : suppliers.get(clientName).searchProducts(descText)) {
+					items.add(productToItemView(product, clientName));
 				}
 			}
-		} catch (Exception e){
-			System.out.println("Error connecting to suppliers...");
-			System.out.println(e.getMessage());
+		} catch (BadText_Exception e) {
+			throwInvalidText_Exception(e.getMessage());
 		}
 
 		items.sort((item1, item2) -> {
@@ -179,7 +170,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		}
 
 		CartView cart = carts.get(cartId);
-		System.out.println(cart);
+		System.out.println("Cart:" + cart);
 		if (cart == null) {
 			throwInvalidCartId_Exception("CartId does not match any existing cart");
 		}
@@ -296,7 +287,7 @@ public class MediatorPortImpl implements MediatorPortType {
 	}
 
 
-	private ItemView productViewToItemView(ProductView product, String clientName) {
+	private ItemView productToItemView(ProductView product, String clientName) {
 		ItemView item = new ItemView();
 		item.setDesc(product.getDesc());
 		item.setPrice(product.getPrice());
