@@ -124,7 +124,9 @@ public class MediatorPortImpl implements MediatorPortType {
 			throwInvalidQuantity_Exception("Quantity must be positive");
 		}
 
-		if (suppliers.get(itemId.getSupplierId()) == null) throwInvalidItemId_Exception("Supplier does not exist");
+		SupplierClient supplierClient = suppliers.get(itemId.getSupplierId());
+		if (supplierClient == null) throwInvalidItemId_Exception("Supplier does not exist");
+		ProductView product = getSupplierProduct(supplierClient, itemId.getProductId());
 
 		CartView cart = carts.get(cartId);
 		if (cart == null) { // create new cart
@@ -133,32 +135,20 @@ public class MediatorPortImpl implements MediatorPortType {
 			carts.put(cartId, cart);
 		}
 
-		CartItemView cartItem = null;
-		for (CartItemView cartItemView : cart.getItems()) { // search for cart
-			if (cartItemView.getItem() != null && equalsItem(itemId, cartItemView.getItem().getItemId())) {
-				cartItem = cartItemView;
-			}
-		}
-
-		if (cartItem == null) { // item not yet on cart - add new item to cart
-			cartItem = new CartItemView();
+		CartItemView cartItem = findCartItem(cart.getItems(), itemId);
+		if (cartItem == null) { // create new cart item & fill info
+			cartItem = newCartItem(itemId, product);
 			cart.getItems().add(cartItem);
 		}
 
-		try {
-			SupplierClient supplierClient = suppliers.get(itemId.getSupplierId());
-			if (supplierClient == null) throwInvalidItemId_Exception("Invalid SupplierID");
-			int newItemQty = cartItem.getQuantity() + itemQty;
-			if (supplierClient.getProduct(itemId.getProductId()).getQuantity() >= newItemQty) {
-				cartItem.setQuantity(newItemQty);
-			} else {
-				throwNotEnoughItems_Exception("Supplier does not have enough items in stock");
-			}
-		} catch (BadProductId_Exception e) {
-			throwInvalidItemId_Exception("ItemID invalid. ProductID does not exist on Supplier");
+		int newItemQty = cartItem.getQuantity() + itemQty;
+		if (product.getQuantity() >= newItemQty) {
+			cartItem.setQuantity(newItemQty);
+		} else {
+			throwNotEnoughItems_Exception("Supplier does not have enough items in stock");
 		}
 	}
-	
+
 	@Override
 	public synchronized ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
@@ -173,14 +163,12 @@ public class MediatorPortImpl implements MediatorPortType {
 		System.out.println("Cart:" + cart);
 		if (cart == null) {
 			throwInvalidCartId_Exception("CartId does not match any existing cart");
+		} else if (cart.getItems() == null || cart.getItems().isEmpty()) {
+			throwEmptyCart_Exception("Cart has no items");
 		}
 
 		ShoppingResultView shopRes = new ShoppingResultView();
 		int price = 0;
-
-		if (cart.getItems().isEmpty()) {
-			throwEmptyCart_Exception("Cart has no items");
-		}
 
 		try {
 			CreditCardClient cardClient = new CreditCardClient(endpointManager.getWsName());
@@ -225,7 +213,7 @@ public class MediatorPortImpl implements MediatorPortType {
 	}
 
 	// Auxiliary operations --------------------------------------------------
-	
+
 	@Override
 	public String ping(String arg0) {
 		StringBuilder builder = new StringBuilder();
@@ -244,7 +232,7 @@ public class MediatorPortImpl implements MediatorPortType {
 
 		return builder.toString();
 	}
-	
+
 	@Override
 	public void clear() {
 		try {
@@ -260,7 +248,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		shopHistory.clear();
 		updateSuppliers();
 	}
-	
+
 	@Override
 	public List<CartView> listCarts() {
 		return new ArrayList<>(carts.values());
@@ -271,22 +259,21 @@ public class MediatorPortImpl implements MediatorPortType {
 		return shopHistory;
 	}
 
-	
+
 	// View helpers -----------------------------------------------------
 
-	private boolean equalsItem(ItemIdView it1, ItemIdView it2) {
-		return it1.getProductId().equals(it2.getProductId()) && it1.getSupplierId().equals(it2.getSupplierId());
-	}
-
-	private CartItemView findCartItem(CartView cart, ItemIdView itemId) {
-		for (CartItemView cartItem : cart.getItems()) {
-			if (equalsItem(cartItem.getItem().getItemId(), itemId)) {
+	private CartItemView findCartItem(List<CartItemView> cartItems, ItemIdView itemId) {
+		for (CartItemView cartItem : cartItems) { // search for cart item
+			if (cartItem.getItem() != null && equalsItem(itemId, cartItem.getItem().getItemId())) {
 				return cartItem;
 			}
 		}
 		return null;
 	}
 
+	private boolean equalsItem(ItemIdView it1, ItemIdView it2) {
+		return it1.getProductId().equals(it2.getProductId()) && it1.getSupplierId().equals(it2.getSupplierId());
+	}
 
 	private ItemView productToItemView(ProductView product, String clientName) {
 		ItemView item = new ItemView();
@@ -299,6 +286,29 @@ public class MediatorPortImpl implements MediatorPortType {
 		item.setItemId(itemId);
 
 		return item;
+	}
+
+	private CartItemView newCartItem(ItemIdView itemId, ProductView product) {
+		CartItemView cartItem = new CartItemView();
+		ItemView item = new ItemView();
+
+		item.setItemId(itemId);
+		item.setPrice(product.getPrice());
+		item.setDesc(product.getDesc());
+		cartItem.setItem(item);
+		cartItem.setQuantity(0);
+		return cartItem;
+	}
+
+	private ProductView getSupplierProduct(SupplierClient supplierClient, String productId) throws InvalidItemId_Exception {
+		ProductView product = null;
+		try {
+			product = supplierClient.getProduct(productId);
+		} catch (BadProductId_Exception e) {
+			throwInvalidItemId_Exception("Item does not exist on supplier!");
+		}
+		if (product == null) throwInvalidItemId_Exception("Item does not exist on supplier!");
+		return product;
 	}
 
 	// Exception helpers -----------------------------------------------------
