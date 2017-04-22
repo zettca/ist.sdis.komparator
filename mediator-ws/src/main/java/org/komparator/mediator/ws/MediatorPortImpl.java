@@ -50,7 +50,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		this.endpointManager = endpointManager;
 	}
 
-	private void updateSuppliers() {
+	void updateSuppliers() {
 		try {
 			UDDINaming uddiNaming = endpointManager.getUddiNaming();
 			Collection<UDDIRecord> supplierRecords = uddiNaming.listRecords("T50_Supplier%");
@@ -76,7 +76,6 @@ public class MediatorPortImpl implements MediatorPortType {
 			throwInvalidItemId_Exception("Item ID cannot be null or empty");
 		}
 
-		updateSuppliers();
 		List<ItemView> items = new ArrayList<>();
 		try {
 			for (String clientName : suppliers.keySet()) {
@@ -98,7 +97,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		if (descText == null || descText.trim().length() == 0) {
 			throwInvalidText_Exception("Search query cannot be null or empty");
 		}
-		updateSuppliers();
+
 		List<ItemView> items = new ArrayList<>();
 		try {
 			for (String clientName : suppliers.keySet()) {
@@ -134,7 +133,6 @@ public class MediatorPortImpl implements MediatorPortType {
 			throwInvalidQuantity_Exception("Quantity must be positive");
 		}
 
-		updateSuppliers();
 		if (suppliers.get(itemId.getSupplierId()) == null) throwInvalidItemId_Exception("Supplier does not exist");
 
 		CartView cart = carts.get(cartId);
@@ -186,7 +184,6 @@ public class MediatorPortImpl implements MediatorPortType {
 			throwInvalidCartId_Exception("CartId does not match any existing cart");
 		}
 
-		updateSuppliers();
 		ShoppingResultView shopRes = new ShoppingResultView();
 		int price = 0;
 
@@ -244,7 +241,6 @@ public class MediatorPortImpl implements MediatorPortType {
 
 		builder.append("Hello from Mediator!\n"); // Ping self back
 
-		updateSuppliers();
 		try { // Ping all Suppliers
 			for (String clientName : suppliers.keySet()) {
 				SupplierClient client = suppliers.get(clientName);
