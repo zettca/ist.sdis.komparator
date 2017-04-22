@@ -1,23 +1,24 @@
 package org.komparator.mediator.ws.it;
 
-import java.io.IOException;
-import java.util.Properties;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.komparator.mediator.ws.cli.MediatorClient;
-import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.cli.SupplierClient;
-import org.komparator.supplier.ws.cli.SupplierClientException;
+
+import java.io.IOException;
+import java.util.Properties;
 
 public class BaseIT {
 
 	private static final String TEST_PROP_FILE = "/test.properties";
-	private static final String uddiURL = "http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/";
 	protected static Properties testProps;
 
 	protected static MediatorClient mediatorClient;
-	protected static SupplierClient supplier1;
-	protected static SupplierClient supplier2;
+
+	private static final int NR_SUPPLIERS = 2;
+	protected static SupplierClient[] supplierClients = new SupplierClient[NR_SUPPLIERS];
+	protected static String[] supplierNames = new String[NR_SUPPLIERS];
+	protected static String[] supplierUrls = new String[NR_SUPPLIERS];
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
@@ -37,57 +38,33 @@ public class BaseIT {
 		String wsName = testProps.getProperty("ws.name");
 		String wsURL = testProps.getProperty("ws.url");
 
+		String supplierNameBase = testProps.getProperty("supplier.ws.name");
+		String supplierUrlBase = testProps.getProperty("supplier.ws.url");
+		for (int i = 0; i < NR_SUPPLIERS; i++) {
+			// add 1 to i because supplier names start with 1 not 0
+			supplierNames[i] = supplierNameBase + (i + 1);
+			supplierUrls[i] = supplierUrlBase.replaceAll("\\$i", Integer.toString(i + 1));
+		}
+
+		System.out.println(supplierUrls[0]);
+		System.out.println(supplierUrls[1]);
+
 		if ("true".equalsIgnoreCase(uddiEnabled)) {
 			mediatorClient = new MediatorClient(uddiURL, wsName);
+			for (int i = 0; i < NR_SUPPLIERS; i++)
+				supplierClients[i] = new SupplierClient(uddiURL, supplierNames[i]);
 		} else {
 			mediatorClient = new MediatorClient(wsURL);
+			for (int i = 0; i < NR_SUPPLIERS; i++)
+				supplierClients[i] = new SupplierClient(supplierUrls[i]);
 		}
 
 	}
 
 	@AfterClass
 	public static void cleanup() {
-	}
-
-	@BeforeClass
-	public static void populate() throws SupplierClientException {
-		supplier1 = new SupplierClient(uddiURL, "T50_Supplier1");
-		supplier2 = new SupplierClient(uddiURL, "T50_Supplier2");
-
-		ProductView product1 = new ProductView();
-		ProductView product2 = new ProductView();
-		ProductView product3 = new ProductView();
-		ProductView product4 = new ProductView();
-
-		product1.setId("Batata");
-		product1.setDesc("Batatas sabem bem");
-		product1.setPrice(1);
-		product1.setQuantity(10);
-
-		product2.setId("Maca");
-		product2.setDesc("Macas sabem bem");
-		product2.setPrice(2);
-		product2.setQuantity(5);
-
-		product3.setId("Banana");
-		product3.setDesc("Bananas sabem bem");
-		product3.setPrice(3);
-		product3.setQuantity(30);
-
-		product4.setId("Batata");
-		product4.setDesc("Batatas sabem bem");
-		product4.setPrice(2);
-		product4.setQuantity(20);
-
-		try {
-			supplier1.createProduct(product1);
-			supplier1.createProduct(product2);
-			supplier2.createProduct(product3);
-			supplier2.createProduct(product4);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		for (int i = 0; i < NR_SUPPLIERS; i++)
+			supplierClients[i] = null;
 	}
 
 }

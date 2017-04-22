@@ -11,12 +11,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komparator.mediator.ws.InvalidItemId_Exception;
+import org.komparator.mediator.ws.InvalidText_Exception;
 import org.komparator.mediator.ws.ItemView;
 import org.komparator.supplier.ws.BadProductId_Exception;
 import org.komparator.supplier.ws.BadProduct_Exception;
 import org.komparator.supplier.ws.ProductView;
 
-public class GetItemsIT extends BaseIT {
+public class SearchItemsIT extends BaseIT {
 
 	// static members
 
@@ -27,7 +28,7 @@ public class GetItemsIT extends BaseIT {
 		mediatorClient.clear();
 
 		// fill-in test products
-		// (since getItems is read-only the initialization below
+		// (since searchItems is read-only the initialization below
 		// can be done once for all tests in this suite)
 		{
 			ProductView prod = new ProductView();
@@ -73,6 +74,15 @@ public class GetItemsIT extends BaseIT {
 			prod.setQuantity(5);
 			supplierClients[0].createProduct(prod);
 		}
+
+		{
+			ProductView prod = new ProductView();
+			prod.setId("p4");
+			prod.setDesc("very cheap batteries");
+			prod.setPrice(2);
+			prod.setQuantity(5);
+			supplierClients[0].createProduct(prod);
+		}
 	}
 
 	@AfterClass
@@ -98,9 +108,9 @@ public class GetItemsIT extends BaseIT {
 
 	// ------ WSDL Faults (error cases) ------
 
-	@Test(expected = InvalidItemId_Exception.class)
-	public void testNullItem() throws InvalidItemId_Exception {
-		mediatorClient.getItems(null);
+	@Test(expected = InvalidText_Exception.class)
+	public void testNullText() throws InvalidText_Exception {
+		mediatorClient.searchItems(null);
 	}
 
 	@Test(expected = InvalidItemId_Exception.class)
@@ -126,64 +136,74 @@ public class GetItemsIT extends BaseIT {
 		mediatorClient.getItems("\n");
 	}
 
-	// not used for evaluation
-	// @Test(expected = InvalidItemId_Exception.class)
-	public void testDot() throws InvalidItemId_Exception {
-		mediatorClient.getItems(".");
-	}
-
 	// ------ Normal cases ------
 
 	@Test
-	public void testInexistingItem1() throws InvalidItemId_Exception {
-		List<ItemView> items = mediatorClient.getItems("p4");
+	public void testInexistingText1() throws InvalidText_Exception {
+		List<ItemView> items = mediatorClient.searchItems("porsche");
 		// desired output is empty, but null is also accepted (case not
 		// specified in project statement)
 		assertTrue(items == null || items.size() == 0);
 	}
 
 	@Test
-	public void testInexistingItem2() throws InvalidItemId_Exception {
-		// There is no such item, but there is an item with the description
-		// "3batteries"
-		List<ItemView> items = mediatorClient.getItems("3batteries");
+	public void testInexistingText2() throws InvalidText_Exception {
+		// There is no item containing this string in its description.
+		// There is one that contains it in its ID though,
+		// but this operation is not supposed to search by ID.
+		List<ItemView> items = mediatorClient.searchItems("p4");
 		// desired output is empty, but null is also accepted (case not
 		// specified in project statement)
 		assertTrue(items == null || items.size() == 0);
 	}
 
 	@Test
-	public void testSingleExistingItem() throws InvalidItemId_Exception {
-		// Testing all item properties only in this test
-		List<ItemView> items = mediatorClient.getItems("p3");
+	public void testSingleExistingText() throws InvalidText_Exception {
+		List<ItemView> items = mediatorClient.searchItems("battery");
 		assertEquals(1, items.size());
 
-		assertEquals("p3", items.get(0).getItemId().getProductId());
-		assertEquals("Digital Multimeter", items.get(0).getDesc());
-		assertEquals(15, items.get(0).getPrice());
-		assertEquals(supplierNames[0], items.get(0).getItemId().getSupplierId());
+		assertEquals("p2", items.get(0).getItemId().getProductId());
+		assertEquals("10x AAA battery", items.get(0).getDesc());
+		assertEquals(8, items.get(0).getPrice());
+		assertEquals(supplierNames[1], items.get(0).getItemId().getSupplierId());
 	}
 
 	@Test
-	public void testMultipleExistingItems() throws InvalidItemId_Exception {
-		List<ItemView> items = mediatorClient.getItems("p1");
-		assertEquals(2, items.size());
+	public void testWithoutOrder() throws InvalidText_Exception {
+		List<ItemView> items = mediatorClient.searchItems("bat");
+		assertEquals(5, items.size());
 	}
 
 	@Test
-	public void testOrder1() throws InvalidItemId_Exception {
-		// First supplier has the cheapest price
-		List<ItemView> items = mediatorClient.getItems("p1");
-		assertEquals(2, items.size());
-		assertTrue(items.get(0).getPrice() <= items.get(1).getPrice());
+	public void testWithOrder() throws InvalidText_Exception {
+		List<ItemView> items = mediatorClient.searchItems("bat");
+		assertEquals(5, items.size());
+
+		// Check order criteria two by two
+		for (int i = 0; i < items.size() - 1; i++) {
+			// Check the first order criterion: product id
+			final String firstProductId = items.get(i).getItemId().getProductId();
+			final String secondProductId = items.get(i + 1).getItemId().getProductId();
+			assertTrue(firstProductId.compareTo(secondProductId) <= 0);
+			// Check the second order criterion: price
+			if (firstProductId.equals(secondProductId)) {
+				final int firstPrice = items.get(i).getPrice();
+				final int secondPrice = items.get(i + 1).getPrice();
+				assertTrue(firstPrice <= secondPrice);
+			}
+		}
 	}
 
 	@Test
-	public void testOrder2() throws InvalidItemId_Exception {
-		// First supplier has the most expensive price
-		List<ItemView> items = mediatorClient.getItems("p2");
-		assertEquals(2, items.size());
-		assertTrue(items.get(0).getPrice() <= items.get(1).getPrice());
+	public void testCaseSensitivity() throws InvalidText_Exception {
+		{
+			List<ItemView> items = mediatorClient.searchItems("digital");
+			assertEquals(0, items.size());
+		}
+		{
+			List<ItemView> items = mediatorClient.searchItems("Digital");
+			assertEquals(1, items.size());
+		}
 	}
 
 }
