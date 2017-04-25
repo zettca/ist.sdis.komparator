@@ -62,31 +62,41 @@ mvn install -DskipTests
 1. Abrir consola para Fornecedor 1
 ```
 cd supplier-ws
-mvn exec:java
+mvn compile exec:java -Dws.i=1
 ```
 
 2. Abrir consola para Fornecedor 2
 ```
 cd supplier-ws
-mvn exec:java -Dws.i=2
+mvn compile exec:java -Dws.i=2
 ```
 
 3. Abrir consola para Mediador
 ```
 cd mediator-ws
-mvn exec:java
+mvn compile exec:java
 ```
 
 4. Finalmente, na consola para o cliente do Mediador
 ```
 cd mediator-ws-cli
-mvn exec:java
+mvn compile exec:java
 ```
 O resultado final do ping deverá ser impresso nesta consola.
 
-## Correr testes de integração 
+## Correr testes de integração
 ```
 cd supplier-ws
+mvn compile exec:java -Dws.i=1
+```
+
+```
+cd supplier-ws
+mvn compile exec:java -Dws.i=2
+```
+
+```
+cd mediator-ws
 mvn compile exec:java
 ```
 
