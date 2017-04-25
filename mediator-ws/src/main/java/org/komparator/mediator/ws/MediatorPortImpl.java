@@ -160,8 +160,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		}
 
 		CartView cart = carts.get(cartId);
-		System.out.println("Cart:" + cart);
-		if (cart == null) {
+			if (cart == null) {
 			throwInvalidCartId_Exception("CartId does not match any existing cart");
 		} else if (cart.getItems() == null || cart.getItems().isEmpty()) {
 			throwEmptyCart_Exception("Cart has no items");
@@ -189,17 +188,17 @@ public class MediatorPortImpl implements MediatorPortType {
 			try {
 				client.buyProduct(productId, qty);
 			} catch (BadProductId_Exception | BadQuantity_Exception | InsufficientQuantity_Exception e) {
-				shopRes.droppedItems.add(cartItem);
+				shopRes.getDroppedItems().add(cartItem);
 				continue;
 			}
 			price += cartItem.getItem().getPrice() * qty;
-			shopRes.purchasedItems.add(cartItem);
+			shopRes.getPurchasedItems().add(cartItem);
 		}
 
 		Result res;
-		if (shopRes.droppedItems.isEmpty()) {
+		if (shopRes.getDroppedItems().isEmpty()) {
 			res = Result.COMPLETE;
-		} else if (shopRes.purchasedItems.isEmpty()) {
+		} else if (shopRes.getPurchasedItems().isEmpty()) {
 			res = Result.EMPTY;
 		} else {
 			res = Result.PARTIAL;
