@@ -1,13 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- http://maven.apache.org/pom.html#Quick_Overview -->
 
-	<!-- Please replace 'CXX' below with 
-        your C (campus) with A (Alameda) / T (Tagus); and 
-        your group number with two digits.
-        Then delete this comment. -->
-    <groupId>org.komparator.CXX</groupId>
+    <groupId>org.komparator.T50</groupId>
     <artifactId>ca-ws-cli</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -24,8 +20,8 @@
         <!-- WSDL is required for client code generation -->
         <ws.url>http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca</ws.url>
         <wsdl.url>${ws.url}?WSDL</wsdl.url>
-    	    
-		<mainclass>pt.ulisboa.tecnico.sdis.ws.cli.CAClientApp</mainclass>
+
+        <mainclass>pt.ulisboa.tecnico.sdis.ws.cli.CAClientApp</mainclass>
 
         <ws.name>CA</ws.name>
         <uddi.url>http://localhost:9090</uddi.url>
