@@ -2,6 +2,7 @@ package example.ws.handler;
 
 import static example.ws.handler.HeaderHandler.CONTEXT_PROPERTY;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -25,6 +26,7 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
 
   /** Date formatter used for outputting timestamps in ISO 8601 format */
   private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+  private Date outboundTime = null;
 
   //
   // Handler interface implementation
@@ -65,7 +67,8 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
         SOAPHeaderElement element = sh.addHeaderElement(name);
 
         //Add node value
-        element.addTextNode(dateFormatter.format(new Date()).toString());
+        outboundTime = new Date();
+        element.addTextNode(dateFormatter.format(outboundTime));
 
       } else {
         System.out.println("Reading header in inbound SOAP message...");
@@ -94,9 +97,17 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
 
         // get header element value
         String valueString = element.getValue();
+        Date inboundTime = dateFormatter.parse(valueString);
 
         // print received header
-        System.out.println("Header value is " + valueString);
+        if (outboundTime != null && inboundTime != null ) {
+          long diff = inboundTime.getTime() - outboundTime.getTime();
+          if (diff > 3*1000){
+            System.out.println("Time interval superior to 3 seconds");
+            return false;
+          /* TODO Throws exeption or handles fault?*/
+          }
+        }
 
         // put header in a property context
         smc.put(CONTEXT_PROPERTY, valueString);
@@ -109,6 +120,8 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
       System.out.print("Caught exception in handleMessage: ");
       System.out.println(e);
       System.out.println("Continue normal processing...");
+    } catch (ParseException e) {
+      e.printStackTrace();
     }
 
     return true;
