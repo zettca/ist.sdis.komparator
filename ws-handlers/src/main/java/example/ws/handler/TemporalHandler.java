@@ -1,26 +1,18 @@
 package example.ws.handler;
 
-import static example.ws.handler.HeaderHandler.CONTEXT_PROPERTY;
-
+import javax.xml.namespace.QName;
+import javax.xml.soap.*;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.MessageContext.Scope;
+import javax.xml.ws.handler.soap.SOAPHandler;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
-import javax.xml.namespace.QName;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.Name;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPEnvelope;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPPart;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.MessageContext.Scope;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
+
+import static example.ws.handler.HeaderHandler.CONTEXT_PROPERTY;
 
 public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
 
@@ -48,36 +40,27 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
     Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
     try {
+      // get SOAP envelope
+      SOAPMessage msg = smc.getMessage();
+      SOAPPart sp = msg.getSOAPPart();
+      SOAPEnvelope se = sp.getEnvelope();
+      SOAPHeader sh = se.getHeader();
+
       if (outboundElement.booleanValue()) {
         System.out.println("Writing header in outbound SOAP message...");
 
-        // get SOAP envelope
-        SOAPMessage msg = smc.getMessage();
-        SOAPPart sp = msg.getSOAPPart();
-        SOAPEnvelope se = sp.getEnvelope();
-
         // add header
-        SOAPHeader sh = se.getHeader();
-        if (sh == null)
-          sh = se.addHeader();
+        if (sh == null) sh = se.addHeader();
 
-        // add header Timestamp
-
+        // add header timestamp element
         Name name = se.createName("time", "t", "http://time");
         SOAPHeaderElement element = sh.addHeaderElement(name);
 
-        //Add node value
         outboundTime = new Date();
         element.addTextNode(dateFormatter.format(outboundTime));
 
       } else {
         System.out.println("Reading header in inbound SOAP message...");
-
-        // get SOAP envelope header
-        SOAPMessage msg = smc.getMessage();
-        SOAPPart sp = msg.getSOAPPart();
-        SOAPEnvelope se = sp.getEnvelope();
-        SOAPHeader sh = se.getHeader();
 
         // check header
         if (sh == null) {
@@ -103,9 +86,8 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
         if (outboundTime != null && inboundTime != null ) {
           long diff = inboundTime.getTime() - outboundTime.getTime();
           if (diff > 3*1000){
-            System.out.println("Time interval superior to 3 seconds");
+            System.out.println("Time interval superior to 3 seconds - rejecting.");
             return false;
-          /* TODO Throws exeption or handles fault?*/
           }
         }
 
