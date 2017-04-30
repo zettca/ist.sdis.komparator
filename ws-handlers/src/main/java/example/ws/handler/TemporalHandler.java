@@ -20,10 +20,6 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
   private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
   private Date outboundTime = null;
 
-  //
-  // Handler interface implementation
-  //
-
   /**
    * Gets the header blocks that can be processed by this Handler instance. If
    * null, processes all.
@@ -46,7 +42,7 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
       SOAPEnvelope se = sp.getEnvelope();
       SOAPHeader sh = se.getHeader();
 
-      if (outboundElement.booleanValue()) {
+      if (outboundElement) {
         System.out.println("Writing header in outbound SOAP message...");
 
         // add header
@@ -87,7 +83,9 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
           long diff = inboundTime.getTime() - outboundTime.getTime();
           if (diff > 3*1000){
             System.out.println("Time interval superior to 3 seconds - rejecting.");
-            return false;
+            // TODO: Handle reject differently? This breaks the other part
+            // Ex: Expected PingResponse, Get Ping (returns message)
+            return true;
           }
         }
 
