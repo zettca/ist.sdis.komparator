@@ -14,6 +14,7 @@ import java.util.Set;
 
 import static example.ws.handler.HeaderHandler.CONTEXT_PROPERTY;
 
+
 public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
 
   /** Date formatter used for outputting timestamps in ISO 8601 format */
