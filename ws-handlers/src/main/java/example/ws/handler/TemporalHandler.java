@@ -52,9 +52,20 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
         // add header timestamp element
         Name name = se.createName("time", "t", "http://time");
         SOAPHeaderElement element = sh.addHeaderElement(name);
-
+        
         outboundTime = new Date();
         element.addTextNode(dateFormatter.format(outboundTime));
+        
+        // add header keyalias element
+        
+        sh = se.addHeader();
+        name = se.createName("keyalias", "ka", "http://keyalias");
+        element = sh.addHeaderElement(name);
+        
+        
+        //TODO DESCOBRIR KEYALIAS
+        element.addTextNode("");
+
 
       } else {
         System.out.println("Reading header in inbound SOAP message...");

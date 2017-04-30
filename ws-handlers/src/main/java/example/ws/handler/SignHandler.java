@@ -52,67 +52,164 @@ import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
-import org.komparator.ca.ws.cli.CAClient;
+import pt.ulisboa.tecnico.sdis.ws.cli.CAClient;
+import pt.ulisboa.tecnico.sdis.ws.cli.CAClientException;
 
+import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
+import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
+import org.komparator.security.CryptoUtil;
 
 public class SignHandler implements SOAPHandler<SOAPMessageContext> {
+
+	private CAClient ca;
+
+	public static final String REQUEST_PROPERTY = "my.request.property";
+
+	public static final String RESPONSE_PROPERTY = "my.response.property";
+
+	public static final String REQUEST_HEADER = "myRequestHeader";
+	public static final String REQUEST_NS = "urn:example";
+
+	public static final String RESPONSE_HEADER = "myResponseHeader";
+	public static final String RESPONSE_NS = REQUEST_NS;
+
+	public static final String CONTEXT_PROPERTY = "my.property";
 
 	public Set<QName> getHeaders() {
 		return null;
 	}
-	CAClient ca;
-
 
 	@Override
 	public boolean handleMessage(SOAPMessageContext smc) {
 		System.out.println("AddTimerToHeaderHandler: Handling message.");
 
-		Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+		ca = setUp("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca");
 		
-		try{
-			// get SOAP envelope
+		CryptoUtil crypto=null;
+		Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+
+		try {
 			SOAPMessage msg = smc.getMessage();
 			SOAPPart sp = msg.getSOAPPart();
 			SOAPEnvelope se = sp.getEnvelope();
-			SOAPHeader sh = se.getHeader();
+			SOAPHeader sh = null;
+			SOAPHeaderElement headerElement = null;
+			SOAPElement element = null;
 
 			if (outboundElement) {
 				System.out.println("Writing header in outbound SOAP message...");
 
-				// add header
-				if (sh == null)
-					sh = se.addHeader();
+				String dataReceived = (String) smc.get(REQUEST_PROPERTY);
 
-				// add header timestamp element
-				Name name = se.createName("CardNumeber", "cc", "http://CardNumber");
-				SOAPHeaderElement element = sh.addHeaderElement(name);
+				// Get data from entity
+				String[] parseData = dataReceived.split("_");
+				String keyAlias = parseData[0];
+				String KeyStorePassword = parseData[1];
+				String keyPassword = parseData[2];
+				String keyStoreFile = parseData[3];
+				
+				// get timestamp from soap header
+				//TODO NAO NECESSARIOOOO DISCUTIRRRRRRRR
 
-				
-				
-				
-			} else {
-				// check header
-				if (sh == null) {
-					System.out.println("Header not found.");
-					return true;
-				}
-	
-				// get first header element
-				Name name = se.createName("myHeader", "d", "http://demo");
+				Name name = se.createName("time", "t", "http://time");
 				Iterator it = sh.getChildElements(name);
 				// check header element
 				if (!it.hasNext()) {
 					System.out.println("Header element not found.");
 					return true;
 				}
-				SOAPElement element = (SOAPElement) it.next();
-	
+				element = (SOAPElement) it.next();
+
 				// get header element value
-				String data_received = element.getValue();
+				String timestamp = element.getValue();
+
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+				msg.writeTo(out);
+
+				String messageToSign = new String(out.toByteArray());
 				
+				final byte[] byteMessage = messageToSign.getBytes();
+				String messageText = printBase64Binary(byteMessage);
+
 				
-	
+				// make digital signature hashing
+				byte[] digitalSignature = null;
+				
+				digitalSignature = crypto.makeDigitalSignature(byteMessage, crypto.getPrivateKeyFromKeystore(keyStoreFile,
+						KeyStorePassword.toCharArray(), keyAlias, keyPassword.toCharArray()));
+				
+				String signedMessageText = printBase64Binary(digitalSignature);
+				
+				// add signature to element value
+				String dataToSend = timestamp + "_" + keyAlias + "_" + signedMessageText + "_" + messageText;
+				
+				// add header element (name, namespace prefix, namespace)
+				name = se.createName(REQUEST_HEADER, "e", REQUEST_NS);
+				headerElement = sh.addHeaderElement(name);
+				headerElement.addTextNode(dataToSend);
+
+			} else {
+				
+				// check header
+				if (sh == null) {
+					System.out.println("Header not found.");
+					return true;
+				}
+				// get first header element
+				Name name = se.createName(REQUEST_HEADER, "e", REQUEST_NS);
+				Iterator it = sh.getChildElements(name);
+				// check header element
+				if (!it.hasNext()) {
+					System.out.printf("Header element %s not found.%n", REQUEST_HEADER);
+					return true;
+				}
+				element = (SOAPElement) it.next();
+		
+				// get header element value
+				String dataReceived = element.getValue();
+				
+				String[] parseData = dataReceived.split("_");
+				
+				// Check if certificate was signed by CA
+				String entityCertificate = ca.getCertificate(parseData[1]);
+				byte[] entityCertificateByes = parseBase64Binary(entityCertificate);
+				
+				byte[] caPublicKeyBytes = ca.getPublicKey("ca");
+				PublicKey caPublicKey = KeyFactory.getInstance("RSA").
+						generatePublic(new X509EncodedKeySpec(caPublicKeyBytes));
+				
+				CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+				
+				InputStream in = new ByteArrayInputStream(entityCertificateByes);
+				X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
+
+				cert.verify(caPublicKey);
+				System.out.println("Certificate was signed by ca");
+				// End check
+				
+				byte[] digitalSignature = parseBase64Binary(parseData[2]);
+				byte[] originalMessage = parseBase64Binary(parseData[3]);
+				
+				byte[] publicKeyInBytes = ca.getPublicKey(parseData[1]);
+				PublicKey publicKey = null;
+				
+				publicKey = KeyFactory.getInstance("RSA").
+						generatePublic(new X509EncodedKeySpec(publicKeyInBytes));
+				
+				// verify signature
+				boolean isValid = false;
+				
+				isValid = crypto.verifyDigitalSignature(digitalSignature, originalMessage, publicKey);
+				
+				if (isValid) {
+					System.out.println("The digital signature is valid");
+				} else {
+					System.out.println("The digital signature is NOT valid");
+					return false;
+				}
+				
 			}
 		} catch (Exception e) {
 			System.out.print("Caught exception in handleMessage: ");
@@ -123,137 +220,26 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 		return true;
 	}
 
-	/*
-	 * public CClient setUp(String url) { if (ca == null) { ca = new
-	 * CaClient(url); } return ca; }
-	 */
-	/**
-	 * Returns the public key from a certificate
-	 * 
-	 * @param certificate
-	 * @return
-	 */
-	public static PublicKey getPublicKeyFromCertificate(Certificate certificate) {
-		return certificate.getPublicKey();
-	}
-
-	/**
-	 * Reads a certificate from a file
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public static Certificate readCertificateFile(String certificateFilePath) throws Exception {
-		FileInputStream fis;
-
-		try {
-			fis = new FileInputStream(certificateFilePath);
-		} catch (FileNotFoundException e) {
-			System.err.println("Certificate file <" + certificateFilePath + "> not fount.");
-			return null;
+	public CAClient setUp(String url) {
+		if (ca == null) {
+			try {
+				ca = new CAClient(url);
+			} catch (CAClientException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		BufferedInputStream bis = new BufferedInputStream(fis);
-
-		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
-		if (bis.available() > 0) {
-			Certificate cert = cf.generateCertificate(bis);
-			return cert;
-			// It is possible to print the content of the certificate file:
-			// System.out.println(cert.toString());
-		}
-		bis.close();
-		fis.close();
-		return null;
+		return ca;
 	}
 
-	/**
-	 * Reads a collections of certificates from a file
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public static Collection<Certificate> readCertificateList(String certificateFilePath) throws Exception {
-		FileInputStream fis;
 
-		try {
-			fis = new FileInputStream(certificateFilePath);
-		} catch (FileNotFoundException e) {
-			System.err.println("Certificate file <" + certificateFilePath + "> not found.");
-			return null;
-		}
-		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-		@SuppressWarnings("unchecked")
-		Collection<Certificate> c = (Collection<Certificate>) cf.generateCertificates(fis);
-		fis.close();
-		return c;
-	}
+	
 
-	/**
-	 * Reads a PrivateKey from a key-store
-	 * 
-	 * @return The PrivateKey
-	 * @throws Exception
-	 */
-	public static PrivateKey getPrivateKeyFromKeystore(String keyStoreFilePath, char[] keyStorePassword,
-			String keyAlias, char[] keyPassword) throws Exception {
 
-		KeyStore keystore = readKeystoreFile(keyStoreFilePath, keyStorePassword);
-		PrivateKey key = (PrivateKey) keystore.getKey(keyAlias, keyPassword);
 
-		return key;
-	}
+	
 
-	/**
-	 * Reads a KeyStore from a file
-	 * 
-	 * @return The read KeyStore
-	 * @throws Exception
-	 */
-	public static KeyStore readKeystoreFile(String keyStoreFilePath, char[] keyStorePassword) throws Exception {
-		FileInputStream fis;
-		try {
-			fis = new FileInputStream(keyStoreFilePath);
-		} catch (FileNotFoundException e) {
-			System.err.println("Keystore file <" + keyStoreFilePath + "> not found.");
-			return null;
-		}
-		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-		keystore.load(fis, keyStorePassword);
-		return keystore;
-	}
-
-	/** auxiliary method to calculate digest from text and cipher it */
-	public static byte[] makeDigitalSignature(byte[] bytes, PrivateKey privateKey) throws Exception {
-
-		// get a signature object using the SHA-1 and RSA combo
-		// and sign the plain-text with the private key
-		Signature sig = Signature.getInstance("SHA1WithRSA");
-		sig.initSign(privateKey);
-		sig.update(bytes);
-		byte[] signature = sig.sign();
-
-		return signature;
-	}
-
-	/**
-	 * auxiliary method to calculate new digest from text and compare it to the
-	 * to deciphered digest
-	 */
-	public static boolean verifyDigitalSignature(byte[] cipherDigest, byte[] bytes, PublicKey publicKey)
-			throws Exception {
-
-		// verify the signature with the public key
-		Signature sig = Signature.getInstance("SHA1WithRSA");
-		sig.initVerify(publicKey);
-		sig.update(bytes);
-		try {
-			return sig.verify(cipherDigest);
-		} catch (SignatureException se) {
-			System.err.println("Caught exception while verifying signature " + se);
-			return false;
-		}
-	}
+	
 
 	@Override
 	public void close(MessageContext context) {
