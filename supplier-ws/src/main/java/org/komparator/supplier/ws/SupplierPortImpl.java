@@ -1,7 +1,9 @@
 package org.komparator.supplier.ws;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.annotation.Resource;
 import javax.jws.HandlerChain;
@@ -40,12 +42,34 @@ public class SupplierPortImpl implements SupplierPortType {
 
 	public String keyStoreFile;
 	public String dataToSend;
-
+	
+	private static final String TEST_PROP_FILE = "/test.properties";
+	protected static Properties testProps;
+	
 	public SupplierPortImpl(SupplierEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
-
-		keyAlias = this.endpointManager.getWsUrl();
 		
+		testProps = new Properties();
+		try {
+			testProps.load(SupplierPortImpl.class.getResourceAsStream(TEST_PROP_FILE));
+			System.out.println("Loaded test properties:");
+			System.out.println(testProps);
+		} catch (IOException e) {
+			final String msg = String.format("Could not load properties file {}", TEST_PROP_FILE);
+			System.out.println(msg);
+			try {
+				throw e;
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+
+		String uddiEnabled = testProps.getProperty("uddi.enabled");
+		String uddiURL = testProps.getProperty("uddi.url");
+		keyAlias = testProps.getProperty("ws.name");
+		String wsURL = testProps.getProperty("ws.url");
+				
 		System.out.println("\n\n\n\n\n URLLLLL \n\n\n"+keyAlias+"\n\n\n\n\n\n");
 		/*0String[] slash_split = url.split("/");
 		String[] dots_split = slash_split[2].split(":");
@@ -56,7 +80,7 @@ public class SupplierPortImpl implements SupplierPortType {
 
 		keyStoreFile = "../supplier-ws/src/main/resources/" + keyAlias + ".jks";
 
-		dataToSend = keyAlias + "_" + keyStoreFile;
+		dataToSend = keyAlias + "#" + keyStoreFile;
 	}
 
 	// Main operations -------------------------------------------------------

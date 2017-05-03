@@ -103,7 +103,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 				String dataReceived = (String) smc.get(REQUEST_PROPERTY);
 
 				// Get data from entity
-				String[] parseData = dataReceived.split("_");
+				String[] parseData = dataReceived.split("#");
 
 				String keyAlias = parseData[0];
 
