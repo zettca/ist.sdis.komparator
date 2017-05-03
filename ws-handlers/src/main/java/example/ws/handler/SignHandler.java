@@ -84,7 +84,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 	public boolean handleMessage(SOAPMessageContext smc) {
 		System.out.println("AddTimerToHeaderHandler: Handling message.");
 
-		ca = setUp("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca");
+		//ca = setUp("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca");
 		
 		CryptoUtil crypto=null;
 		Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
@@ -104,14 +104,18 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// Get data from entity
 				String[] parseData = dataReceived.split("_");
-				String keyAlias = parseData[0];
-				String KeyStorePassword = parseData[1];
-				String keyPassword = parseData[2];
-				String keyStoreFile = parseData[3];
-				
-				// get timestamp from soap header
-				//TODO NAO NECESSARIOOOO DISCUTIRRRRRRRR
 
+				String keyAlias = parseData[0];
+
+				System.out.println("\n \n \n \n " + keyAlias + "\n \n \n \n");
+
+				String KeyStorePassword = "WkyodoJT";
+				String keyPassword = "WkyodoJT";
+
+				String keyStoreFile = parseData[1];
+				System.out.println(keyStoreFile);
+				// get timestamp from soap header
+				/*
 				Name name = se.createName("time", "t", "http://time");
 				Iterator it = sh.getChildElements(name);
 				// check header element
@@ -123,6 +127,8 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// get header element value
 				String timestamp = element.getValue();
+
+				System.out.println();
 
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -149,6 +155,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 				name = se.createName(REQUEST_HEADER, "e", REQUEST_NS);
 				headerElement = sh.addHeaderElement(name);
 				headerElement.addTextNode(dataToSend);
+				*/
 
 			} else {
 				

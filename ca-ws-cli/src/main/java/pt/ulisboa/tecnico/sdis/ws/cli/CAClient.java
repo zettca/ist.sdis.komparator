@@ -117,9 +117,9 @@ public class CAClient implements CA {
 		
 		try {
 			if(entity.equals("ca")){
-				c = readCertificateFile("../ca-ws/src/main/resources/ca.cer");
+				c = readCertificateFile("../ca-ws-cli/src/main/resources/ca.cer");
 			}else{
-				c = readCertificateFile("../ca-ws/src/main/resources/" + entity + ".cer");
+				c = readCertificateFile("../ca-ws-cli/src/main/resources/" + entity + ".cer");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

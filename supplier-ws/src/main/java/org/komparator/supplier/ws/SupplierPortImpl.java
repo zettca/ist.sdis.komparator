@@ -3,13 +3,19 @@ package org.komparator.supplier.ws;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
+import javax.xml.ws.handler.MessageContext;
 
+
+import example.ws.handler.SignHandler;
 import org.komparator.supplier.domain.Product;
 import org.komparator.supplier.domain.Purchase;
 import org.komparator.supplier.domain.QuantityException;
 import org.komparator.supplier.domain.Supplier;
+
+import javax.xml.ws.WebServiceContext;
 
 
 @WebService(
@@ -26,14 +32,39 @@ public class SupplierPortImpl implements SupplierPortType {
 	// end point manager
 	private SupplierEndpointManager endpointManager;
 
+	@Resource
+	private WebServiceContext webServiceContext;
+
+
+	public String keyAlias;
+
+	public String keyStoreFile;
+	public String dataToSend;
+
 	public SupplierPortImpl(SupplierEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
+
+		keyAlias = this.endpointManager.getWsUrl();
+		
+		System.out.println("\n\n\n\n\n URLLLLL \n\n\n"+keyAlias+"\n\n\n\n\n\n");
+		/*0String[] slash_split = url.split("/");
+		String[] dots_split = slash_split[2].split(":");
+		String port = dots_split[1];
+		int server_id = Integer.parseInt(port) % 10;
+
+		//keyAlias = "T50_Supplier" + server_id;*/
+
+		keyStoreFile = "../supplier-ws/src/main/resources/" + keyAlias + ".jks";
+
+		dataToSend = keyAlias + "_" + keyStoreFile;
 	}
 
 	// Main operations -------------------------------------------------------
 	
 	
 	public ProductView getProduct(String productId) throws BadProductId_Exception {
+		sendDataToSign();
+
 		// check product id
 		if (productId == null)
 			throwBadProductId("Product identifier cannot be null!");
@@ -54,6 +85,8 @@ public class SupplierPortImpl implements SupplierPortType {
 	}
 
 	public List<ProductView> searchProducts(String descText) throws BadText_Exception {
+		sendDataToSign();
+
 		//check argument not empty nor has spaces
 		if(descText == null)
 			throwBadText("Product description cannot be null!");
@@ -80,6 +113,8 @@ public class SupplierPortImpl implements SupplierPortType {
 
 	public String buyProduct(String productId, int quantity)
 			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception {
+		sendDataToSign();
+
 		// check product id
 		if (productId == null)
 			throwBadProductId("Product identifier cannot be null!");
@@ -105,7 +140,9 @@ public class SupplierPortImpl implements SupplierPortType {
 	// Auxiliary operations --------------------------------------------------
 
 	public String ping(String name) {
-		if (name == null || name.trim().length() == 0)
+		sendDataToSign();
+
+	    if (name == null || name.trim().length() == 0)
 			name = "friend";
 
 		String wsName = endpointManager.getWsName();
@@ -118,10 +155,12 @@ public class SupplierPortImpl implements SupplierPortType {
 	}
 
 	public void clear() {
+		sendDataToSign();
 		Supplier.getInstance().reset();
 	}
 
 	public void createProduct(ProductView productToCreate) throws BadProductId_Exception, BadProduct_Exception {
+		sendDataToSign();
 		// check null
 		if (productToCreate == null)
 			throwBadProduct("Product view cannot be null!");
@@ -151,6 +190,7 @@ public class SupplierPortImpl implements SupplierPortType {
 	}
 
 	public List<ProductView> listProducts() {
+		sendDataToSign();
 		Supplier supplier = Supplier.getInstance();
 		List<ProductView> pvs = new ArrayList<ProductView>();
 		for (String pid : supplier.getProductsIDs()) {
@@ -162,6 +202,7 @@ public class SupplierPortImpl implements SupplierPortType {
 	}
 
 	public List<PurchaseView> listPurchases() {
+		sendDataToSign();
 		Supplier supplier = Supplier.getInstance();
 		List<PurchaseView> pvs = new ArrayList<PurchaseView>();
 		for (String pid : supplier.getPurchasesIDs()) {
@@ -227,6 +268,12 @@ public class SupplierPortImpl implements SupplierPortType {
 		InsufficientQuantity faultInfo = new InsufficientQuantity();
 		faultInfo.message = message;
 		throw new InsufficientQuantity_Exception(message, faultInfo);
+	}
+
+	public void sendDataToSign() {
+		MessageContext mc = webServiceContext.getMessageContext();
+
+		mc.put(SignHandler.REQUEST_PROPERTY, dataToSend);
 	}
 
 }

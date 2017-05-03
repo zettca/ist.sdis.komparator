@@ -26,6 +26,10 @@ public class SupplierEndpointManager {
 	public String getWsName() {
 		return wsName;
 	}
+	
+	public String getWsUrl() {
+		return this.wsURL;
+	}
 
 	/** Web Service end point */
 	private Endpoint endpoint = null;

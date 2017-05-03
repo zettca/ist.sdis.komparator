@@ -57,7 +57,7 @@ public class CryptoUtil {
 
 		// get a signature object using the SHA-1 and RSA combo
 		// and sign the plain-text with the private key
-		Signature sig = Signature.getInstance("SHA1WithRSA");
+		Signature sig = Signature.getInstance("SHA256withRSA");
 		sig.initSign(privateKey);
 		sig.update(bytes);
 		byte[] signature = sig.sign();
