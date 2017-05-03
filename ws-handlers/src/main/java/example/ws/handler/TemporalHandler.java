@@ -90,14 +90,15 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
         String valueString = element.getValue();
         Date inboundTime = dateFormatter.parse(valueString);
 
+        Date present = new Date();
+
         // print received header
-        if (outboundTime != null && inboundTime != null ) {
-          long diff = inboundTime.getTime() - outboundTime.getTime();
+        if (inboundTime != null ) {
+          long diff = inboundTime.getTime() - present.getTime();
           if (diff > 3*1000){
             System.out.println("Time interval superior to 3 seconds - rejecting.");
-            // TODO: Handle reject differently? This breaks the other part
-            // Ex: Expected PingResponse, Get Ping (returns message)
-            return true;
+
+            return false;
           }
         }
 
