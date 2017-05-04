@@ -17,10 +17,6 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
   /** Date formatter used for outputting timestamps in ISO 8601 format */
   private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
-  /**
-   * Gets the header blocks that can be processed by this Handler instance. If
-   * null, processes all.
-   */
   @Override
   public Set<QName> getHeaders() {
     return null;
@@ -28,10 +24,7 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
 
   @Override
   public boolean handleMessage(SOAPMessageContext smc) {
-    System.out.println("AddTimerToHeaderHandler: Handling message.");
-
     Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-
     return (outbound) ? handleOutbound(smc) : handleInbound(smc);
   }
 
