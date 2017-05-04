@@ -26,6 +26,8 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
     @Override
     public boolean handleMessage(SOAPMessageContext smc) {
         Boolean isOutbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+		System.out.println("\n\n\n\nFRESHNESS Handler: Handling message.");
+
         return (isOutbound) ? handleOutbound(smc) : handleInbound(smc);
     }
 
@@ -40,7 +42,9 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
     }
 
     private boolean handleOutbound(SOAPMessageContext smc) {
-        try {
+		System.out.println("OUTBOUND FRESHHANDLER");
+
+    	try {
             long timestamp = new Date().getTime();
             final byte array[] = new byte[8];
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
@@ -61,7 +65,9 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
     }
 
     private boolean handleInbound(SOAPMessageContext smc) {
-        try {
+		System.out.println("INTBOUND FRESHHANDLER");
+
+    	try {
             SOAPEnvelope env = smc.getMessage().getSOAPPart().getEnvelope();
             SOAPHeader sh = getHeader(env);
             Iterator it = sh.getAllAttributes();

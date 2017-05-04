@@ -92,12 +92,18 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 			SOAPMessage msg = smc.getMessage();
 			SOAPPart sp = msg.getSOAPPart();
 			SOAPEnvelope se = sp.getEnvelope();
-			SOAPHeader sh = null;
+			SOAPHeader sh = se.getHeader();
+
+			// check header
+			if (sh == null) {
+				System.out.println("Header not found.");
+				return true;
+			}
 			SOAPHeaderElement headerElement = null;
 			SOAPElement element = null;
 
 			if (outboundElement) {
-				System.out.println("Writing header in outbound SOAP message...");
+				System.out.println("OUTBOUND SIGNHANDLER");
 
 				String dataReceived = (String) smc.get(REQUEST_PROPERTY);
 
@@ -110,9 +116,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 				String keyStoreFile = parseData[1];
 				// get timestamp from soap header
 				
-				
-				//TODO timestamp ver melhor
-				Name name = se.createName("time", "t", "http://time");
+				Name name = se.createName("time", "t", "http://supplier.komparator.org/");
 				Iterator it = sh.getChildElements(name);
 				// check header element
 				if (!it.hasNext()) {
@@ -141,13 +145,15 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 				// make digital signature hashing
 				byte[] digitalSignature = null;
 				
-				digitalSignature = CryptoUtil.makeDigitalSignature(byteMessage, CryptoUtil.getPrivateKeyFromKeystore(keyStoreFile,
-						KeyStorePassword.toCharArray(), keyAlias.toLowerCase(), keyPassword.toCharArray()));
+				PrivateKey pk = CryptoUtil.getPrivateKeyFromKeystore(keyStoreFile, KeyStorePassword.toCharArray() 
+							, keyAlias.toLowerCase(), keyPassword.toCharArray());
+				
+				digitalSignature = CryptoUtil.makeDigitalSignature(byteMessage,pk);
 				
 				String signedMessageText = printBase64Binary(digitalSignature);
 				
 				// add signature to element value
-				String dataToSend = timestamp + "#" + keyAlias + "#" + signedMessageText + "#" + messageText;
+				String dataToSend = timestamp + "#" + keyAlias + "#" + signedMessageText + "#" + messageToSign;
 				
 				// add header element (name, namespace prefix, namespace)
 				name = se.createName(REQUEST_HEADER, "e", REQUEST_NS);
@@ -156,12 +162,8 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 				
 
 			} else {
+				System.out.println("INBOUND SIGNHANDLER.");
 				
-				// check header
-				if (sh == null) {
-					System.out.println("Header not found.");
-					return true; //FALSEEEEEEEEEEEEEEEEEEEEEEEEE
-				}
 				// get first header element
 				Name name = se.createName(REQUEST_HEADER, "e", REQUEST_NS);
 				Iterator it = sh.getChildElements(name);
@@ -176,54 +178,32 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 				String dataReceived = element.getValue();
 				
 				String[] parseData = dataReceived.split("#");
+				
 				String timestamp = parseData[0];
 				String keyAlias = parseData[1];
 				String signedMessageText = parseData[2];
 				String messageText = parseData[3];
-				String keyStoreFile = null;
-				
-				//GET SENDER CERTIFICATE
-				// DECYPHER HASH
-				// hash 
-				// compare
-				// return true
-				
-				if(keyAlias.contains("mediator"))
-					keyStoreFile = "../supplier-ws/src/main/resources/T50_Mediator.cert";
-				else{
-					keyStoreFile = "../mediator-ws/src/main/resources/T50_Supplier" 
-							+ keyAlias.substring(keyAlias.length()-1) + ".cer";
-				}
 								
-				if(CryptoUtil.readCertificateFile(keyStoreFile)==null){
-					
-					String caKeyStoreFile = keyStoreFile.substring(0, parseData[1].lastIndexOf("/"))+"ca.cer";
+				// Check if certificate was signed by CA
+				String entityCertificateString = ca.getCertificate(keyAlias.toLowerCase());
+				byte[] entityCertificateBytes = parseBase64Binary(entityCertificateString);
+				byte[] caPublicKeyBytes = ca.getPublicKey("ca");
+				PublicKey caPublicKey = KeyFactory.getInstance("RSA").
+						generatePublic(new X509EncodedKeySpec(caPublicKeyBytes));
 				
-					// Check if certificate was signed by CA
-					String entityCertificate = ca.getCertificate(keyAlias);
-					byte[] entityCertificateByes = parseBase64Binary(entityCertificate);
-					
-					
-					Certificate c = CryptoUtil.readCertificateFile(caKeyStoreFile);
-					byte[] caPublicKeyBytes = c.getPublicKey().getEncoded();
-					
-					PublicKey caPublicKey = KeyFactory.getInstance("RSA")
-							.generatePublic(new X509EncodedKeySpec(caPublicKeyBytes));
-					
-					CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-					
-					InputStream in = new ByteArrayInputStream(entityCertificateByes);
-					X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
-	
-					cert.verify(caPublicKey);
-					System.out.println("Certificate was signed by ca");
-					// End check
-				}
+				CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+				
+				InputStream in = new ByteArrayInputStream(entityCertificateBytes);
+				X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
+
+				cert.verify(caPublicKey);
+				System.out.println("Certificate was signed by ca");
+				// End check
 				
 				byte[] digitalSignature = parseBase64Binary(signedMessageText);
 				byte[] originalMessage = parseBase64Binary(messageText);
 				
-				byte[] publicKeyInBytes = ca.getPublicKey(keyAlias);
+				byte[] publicKeyInBytes = ca.getPublicKey(keyAlias.toLowerCase());
 				PublicKey publicKey = null;
 				
 				publicKey = KeyFactory.getInstance("RSA").
