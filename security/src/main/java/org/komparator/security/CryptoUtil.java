@@ -38,7 +38,7 @@ public class CryptoUtil {
 		return resultado;
 	}
 	
-	public boolean verifyDigitalSignature(byte[] cipherDigest, byte[] bytes, PublicKey publicKey)
+	public static boolean verifyDigitalSignature(byte[] cipherDigest, byte[] bytes, PublicKey publicKey)
 			throws Exception {
 
 		// verify the signature with the public key
@@ -53,7 +53,7 @@ public class CryptoUtil {
 		}
 	}
 	
-	public byte[] makeDigitalSignature(byte[] bytes, PrivateKey privateKey) throws Exception {
+	public static byte[] makeDigitalSignature(byte[] bytes, PrivateKey privateKey) throws Exception {
 
 		// get a signature object using the SHA-1 and RSA combo
 		// and sign the plain-text with the private key
@@ -65,7 +65,7 @@ public class CryptoUtil {
 		return signature;
 	}
 	
-	public KeyStore readKeystoreFile(String keyStoreFilePath, char[] keyStorePassword) throws Exception {
+	public static KeyStore readKeystoreFile(String keyStoreFilePath, char[] keyStorePassword) throws Exception {
 		FileInputStream fis;
 		try {
 			fis = new FileInputStream(keyStoreFilePath);
@@ -78,7 +78,7 @@ public class CryptoUtil {
 		return keystore;
 	}
 	
-	public PrivateKey getPrivateKeyFromKeystore(String keyStoreFilePath, char[] keyStorePassword,
+	public static PrivateKey getPrivateKeyFromKeystore(String keyStoreFilePath, char[] keyStorePassword,
 			String keyAlias, char[] keyPassword) throws Exception {
 
 		KeyStore keystore = readKeystoreFile(keyStoreFilePath, keyStorePassword);
@@ -89,6 +89,30 @@ public class CryptoUtil {
 	
 	public PublicKey getPublicKeyFromCertificate(Certificate certificate) {
 		return certificate.getPublicKey();
+	}
+	
+	public static Certificate readCertificateFile(String certificateFilePath) throws Exception {
+		FileInputStream fis;
+
+		try {
+			fis = new FileInputStream(certificateFilePath);
+		} catch (FileNotFoundException e) {
+			System.err.println("Certificate file <" + certificateFilePath + "> not fount.");
+			return null;
+		}
+		BufferedInputStream bis = new BufferedInputStream(fis);
+
+		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+		if (bis.available() > 0) {
+			Certificate cert = cf.generateCertificate(bis);
+			return cert;
+			// It is possible to print the content of the certificate file:
+			// System.out.println(cert.toString());
+		}
+		bis.close();
+		fis.close();
+		return null;
 	}
 	
 	

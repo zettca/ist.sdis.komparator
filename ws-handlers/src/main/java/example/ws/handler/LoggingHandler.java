@@ -66,6 +66,9 @@ public class LoggingHandler implements SOAPHandler<SOAPMessageContext> {
 	 * IOException
 	 */
 	private void logToSystemOut(SOAPMessageContext smc) {
+		
+	    System.out.println("\n\n\n LoggingHandler: Handling message.");
+
 		Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		// print current timestamp

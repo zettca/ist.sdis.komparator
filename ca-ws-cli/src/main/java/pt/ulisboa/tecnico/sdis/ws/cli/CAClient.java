@@ -109,25 +109,22 @@ public class CAClient implements CA {
 	public String getCertificate(String certificateName) {
 		return port.getCertificate(certificateName);
 	}
-	
-	
-	public byte[] getPublicKey(String entity){
-		
+
+	public byte[] getPublicKey(String entity) {
+
 		Certificate c = null;
-		
+
 		try {
-			if(entity.equals("ca")){
-				c = readCertificateFile("../ca-ws-cli/src/main/resources/ca.cer");
-			}else{
-				c = readCertificateFile("../ca-ws-cli/src/main/resources/" + entity + ".cer");
-			}
+
+			c = readCertificateFile("../ca-ws-cli/src/main/resources/" + entity + ".cer");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return c.getPublicKey().getEncoded();
 	}
-	
+
 	public static Certificate readCertificateFile(String certificateFilePath) throws Exception {
 		FileInputStream fis;
 
@@ -151,6 +148,5 @@ public class CAClient implements CA {
 		fis.close();
 		return null;
 	}
-
 
 }

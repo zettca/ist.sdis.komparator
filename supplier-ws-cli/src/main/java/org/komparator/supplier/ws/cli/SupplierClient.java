@@ -16,6 +16,8 @@ import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.PurchaseView;
 import org.komparator.supplier.ws.SupplierPortType;
 import org.komparator.supplier.ws.SupplierService;
+
+import example.ws.handler.SignHandler;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
 /**
@@ -36,7 +38,25 @@ public class SupplierClient implements SupplierPortType {
 	private String wsURL = null; // default value is defined inside WSDL
 	private String uddiURL = null;
 	private String wsName = null; // service name to contact
+	
 
+	public static final String keyAlias = "T50_Mediator";
+	public static final String keyStoreFile = "../mediator-ws/src/main/resources/T50_Mediator.jks";
+	
+	/** constructor with provided web service URL */
+	public SupplierClient(String wsURL) throws SupplierClientException {
+		this.wsURL = wsURL;
+		createStub();
+	}
+
+	public SupplierClient(String uddiURL, String wsName) throws SupplierClientException {
+		this.uddiURL = uddiURL;
+		this.wsName = wsName;
+		uddiLookup();
+		createStub();
+	}
+	
+	
 	public String getWsURL() {
 		return wsURL;
 	}
@@ -50,19 +70,6 @@ public class SupplierClient implements SupplierPortType {
 
 	public void setVerbose(boolean verbose) {
 		this.verbose = verbose;
-	}
-
-	/** constructor with provided web service URL */
-	public SupplierClient(String wsURL) throws SupplierClientException {
-		this.wsURL = wsURL;
-		createStub();
-	}
-
-	public SupplierClient(String uddiURL, String wsName) throws SupplierClientException {
-		this.uddiURL = uddiURL;
-		this.wsName = wsName;
-		uddiLookup();
-		createStub();
 	}
 
 	private void uddiLookup() throws SupplierClientException {
@@ -109,43 +116,59 @@ public class SupplierClient implements SupplierPortType {
 
 	@Override
 	public ProductView getProduct(String productId) throws BadProductId_Exception {
+		setDataToSend();
 		return port.getProduct(productId);
 	}
 
 	@Override
 	public List<ProductView> searchProducts(String descText) throws BadText_Exception {
+		setDataToSend();
 		return port.searchProducts(descText);
 	}
 
 	@Override
 	public String buyProduct(String productId, int quantity)
 			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception {
+		setDataToSend();
 		return port.buyProduct(productId, quantity);
 	}
 
 	@Override
 	public String ping(String name) {
+		setDataToSend();
 		return port.ping(name);
 	}
 
 	@Override
 	public void clear() {
+		setDataToSend();
 		port.clear();
 	}
 
 	@Override
 	public void createProduct(ProductView productToCreate) throws BadProductId_Exception, BadProduct_Exception {
+		setDataToSend();
 		port.createProduct(productToCreate);
 	}
 
 	@Override
 	public List<ProductView> listProducts() {
+		setDataToSend();
 		return port.listProducts();
 	}
 
 	@Override
 	public List<PurchaseView> listPurchases() {
+		setDataToSend();
 		return port.listPurchases();
 	}
+	
+	public void setDataToSend(){
+        BindingProvider bindingProvider = (BindingProvider) port;
+        Map<String, Object> requestContext = bindingProvider.getRequestContext();
+       
+        String dataToSend = keyAlias + "#"  + keyStoreFile;
+        requestContext.put(SignHandler.REQUEST_PROPERTY, dataToSend);
+    }
 
 }
