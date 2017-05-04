@@ -1,64 +1,28 @@
 package example.ws.handler;
 
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-import javax.xml.soap.Name;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPEnvelope;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPPart;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.MessageContext.Scope;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.security.KeyFactory;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.spec.X509EncodedKeySpec;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-import javax.xml.soap.Name;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPEnvelope;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPPart;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.MessageContext.Scope;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
-
+import org.komparator.security.CryptoUtil;
 import pt.ulisboa.tecnico.sdis.ws.cli.CAClient;
 import pt.ulisboa.tecnico.sdis.ws.cli.CAClientException;
 
+import javax.xml.namespace.QName;
+import javax.xml.soap.*;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.soap.SOAPHandler;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Iterator;
+import java.util.Set;
+
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
-
-import org.komparator.security.CryptoUtil;
 
 public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 
@@ -82,7 +46,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 
 	@Override
 	public boolean handleMessage(SOAPMessageContext smc) {
-		System.out.println("\n\n\n\n Sign Handler: Handling message.");
+		System.out.println("\n\n\tSign Handler: Handling message.");
 
 		ca = setUp("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca");
 		
@@ -127,13 +91,8 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// get header element value
 				String timestamp = element.getValue();
-				
-				System.out.println("\n\n\n\n\n timestamp\n\n\n"+timestamp+"\n\n\n\n");
 
-				
-				
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
-
 				msg.writeTo(out);
 
 				String messageToSign = new String(out.toByteArray());

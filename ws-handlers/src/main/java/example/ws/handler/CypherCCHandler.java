@@ -29,7 +29,7 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
     @Override
     public boolean handleMessage(SOAPMessageContext smc) {
         Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-        System.out.println("CypherCC Handler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
+        System.out.println("\n\n\tCypherCC Handler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
         return (outbound) ? handleOutbound(smc) : handleInbound(smc);
     }
 
@@ -37,12 +37,9 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
         try {
             SOAPEnvelope env = smc.getMessage().getSOAPPart().getEnvelope();
             SOAPBody sb = env.getBody();
-            Name name = env.createName("buyCart"/*, "ns2", "http://ws.mediator.komparator.org/"*/); // not sure
+            Name name = env.createName("buyCart", "ns2", "http://ws.mediator.komparator.org/"); // not sure
             Iterator it = sb.getChildElements(name);
-            if (!it.hasNext()) {
-                System.out.println("No BuyCart? Should be response...");
-                return true;
-            }
+            if (!it.hasNext()) return true;
 
             SOAPElement el = (SOAPElement) it.next();
             name = env.createName("creditCardNr");
@@ -76,18 +73,16 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
         try {
             SOAPEnvelope env = smc.getMessage().getSOAPPart().getEnvelope();
             SOAPBody sb = env.getBody();
-            Name name = env.createName("buyCart"/*, "ns2", "http://ws.mediator.komparator.org/"*/); // not sure
+            Name name = env.createName("buyCart", "ns2", "http://ws.mediator.komparator.org/"); // not sure
             Iterator it = sb.getChildElements(name);
-            if (!it.hasNext()) {
-                System.out.println("No BuyCart? Should be response...");
-                return true;
-            }
+            if (!it.hasNext()) return true;
 
             SOAPElement el = (SOAPElement) it.next();
             name = env.createName("creditCardNr");
             it = el.getChildElements(name);
             if (!it.hasNext()) {
                 System.out.println("No creditCardNr entry? Totally unexpected...");
+                return false;
             }
 
             el = (SOAPElement) it.next();
@@ -95,6 +90,7 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
 
             /* Mediator-cli sending to Mediator */
 
+            System.out.println("Cyphered CC is: " + cypheredCC);
 
             // TODO: Do DeCypher CC
             String keyPath = "";
@@ -104,6 +100,7 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
             String textCC = printBase64Binary(bytesCC);
             el.setValue(textCC);
 
+            System.out.println("DeCyphered CC is: " + textCC);
 
         } catch (SOAPException e) {
             e.printStackTrace();
