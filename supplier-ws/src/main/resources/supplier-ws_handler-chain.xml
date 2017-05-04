@@ -8,7 +8,10 @@
         <handler>
             <handler-class>example.ws.handler.TemporalHandler</handler-class>
         </handler>
-         <handler>
+        <handler>
+            <handler-class>example.ws.handler.FreshnessHandler</handler-class>
+        </handler>
+        <handler>
             <handler-class>example.ws.handler.SignHandler</handler-class>
         </handler>
         <handler>
