@@ -29,6 +29,7 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
     @Override
     public boolean handleMessage(SOAPMessageContext smc) {
         Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+        System.out.println("CypherCC Handler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
         return (outbound) ? handleOutbound(smc) : handleInbound(smc);
     }
 

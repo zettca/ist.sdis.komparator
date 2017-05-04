@@ -5,6 +5,8 @@ import javax.xml.soap.*;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
@@ -25,10 +27,9 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
 
     @Override
     public boolean handleMessage(SOAPMessageContext smc) {
-        Boolean isOutbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-		System.out.println("\n\n\n\nFRESHNESS Handler: Handling message.");
-
-        return (isOutbound) ? handleOutbound(smc) : handleInbound(smc);
+        Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+        System.out.println("\n\n\n\nFreshness Handler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
+        return (outbound) ? handleOutbound(smc) : handleInbound(smc);
     }
 
     @Override
@@ -42,9 +43,10 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
     }
 
     private boolean handleOutbound(SOAPMessageContext smc) {
-		System.out.println("OUTBOUND FRESHHANDLER");
+        try {
+            Boolean isServer = false;
+            if (isServer) return true; // TODO: check if server
 
-    	try {
             long timestamp = new Date().getTime();
             final byte array[] = new byte[8];
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
@@ -52,7 +54,7 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
 
             SOAPEnvelope env = smc.getMessage().getSOAPPart().getEnvelope();
             SOAPHeader sh = getHeader(env);
-            Name name = env.createName("identifier", "id", "http://supplier.komparator.org/");
+            Name name = env.createName("token", "id", "http://supplier.komparator.org/");
             SOAPHeaderElement el = sh.addHeaderElement(name);
             el.addTextNode(printHexBinary(array));
 
@@ -65,28 +67,74 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
     }
 
     private boolean handleInbound(SOAPMessageContext smc) {
-		System.out.println("INTBOUND FRESHHANDLER");
+        try {
+            Boolean isServer = true;
+            if (!isServer) return true; // TODO: check if server
 
-    	try {
             SOAPEnvelope env = smc.getMessage().getSOAPPart().getEnvelope();
             SOAPHeader sh = getHeader(env);
-            Iterator it = sh.getAllAttributes();
+            Name name = env.createName("token", "id", "http://supplier.komparator.org/");
+            Iterator it = sh.getChildElements(name);
             if (!it.hasNext()) {
                 System.out.println("Freshness: Header element not found.");
                 return false;
             }
             SOAPElement el = (SOAPElement) it.next();
-            String value = el.getValue();
-            System.out.println("GOT" + value);
+            String token = el.getValue();
+            System.out.println("GOT" + token);
 
-            String CONTEXT_PROPERTY = "identifier.property";
-            smc.put(CONTEXT_PROPERTY, value);
+            String path = "tokens.tsv";
+            if (!validToken(path, token)) { // Rejects for existing token/errors
+                System.out.println("Freshness: Invalid token. Rejecting message!");
+                return false;
+            }
+
+            addToken(path, token);
+
+            // TODO: Reload after 10 seconds
+            String CONTEXT_PROPERTY = "token.property";
+            smc.put(CONTEXT_PROPERTY, token);
             smc.setScope(CONTEXT_PROPERTY, MessageContext.Scope.APPLICATION);
 
         } catch (SOAPException e) {
             e.printStackTrace();
         }
         return true;
+    }
+
+    private boolean validToken(String path, String token) {
+        try {
+            FileInputStream is = new FileInputStream(path);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.defaultCharset())); // charset?
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("Read Line: " + line);
+                if (line.trim().equals(token)) {
+                    System.out.println("Token found! Rejecting...");
+                    return false;
+                }
+            }
+            reader.close();
+            is.close();
+            return true;
+        } catch (FileNotFoundException e) {
+            System.out.println("File does not exist!");
+        } catch (IOException e) {
+            System.out.println("Error reading file!");
+        }
+        return false;
+    }
+
+    private void addToken(String path, String token) {
+        try {
+            BufferedWriter output = new BufferedWriter(new FileWriter(path, true));
+            output.append(token);
+            output.newLine();
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private SOAPHeader getHeader(SOAPEnvelope env) throws SOAPException {
