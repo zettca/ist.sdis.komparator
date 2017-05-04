@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
+import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
 public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
 
@@ -48,7 +48,7 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
             if (isServer) return true; // TODO: check if server
 
             long timestamp = new Date().getTime();
-            final byte array[] = new byte[8];
+            final byte array[] = new byte[16];
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
             random.nextBytes(array);
 
@@ -56,7 +56,7 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
             SOAPHeader sh = getHeader(env);
             Name name = env.createName("token", "id", "http://supplier.komparator.org/");
             SOAPHeaderElement el = sh.addHeaderElement(name);
-            el.addTextNode(printHexBinary(array));
+            el.addTextNode(printBase64Binary(array));
 
         } catch (NoSuchAlgorithmException e) {
             System.out.println("SecureRandom algorithm does not exist" + e.getMessage());
@@ -123,7 +123,7 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
         } catch (IOException e) {
             System.out.println("Error reading file!");
         }
-        return false;
+        return true; // default case
     }
 
     private void addToken(String path, String token) {
