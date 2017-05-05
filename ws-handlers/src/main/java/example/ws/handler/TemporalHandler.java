@@ -40,7 +40,7 @@ public class TemporalHandler implements SOAPHandler<SOAPMessageContext> {
       // check header element
       if (!it.hasNext()) {
         System.out.println("Temporal: Header element not found.");
-        return false;
+        return true;
       }
       SOAPElement el = (SOAPElement) it.next();
       String value = el.getValue();
