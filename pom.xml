@@ -9,9 +9,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <!-- specify modules to include in the build reactor -->
-        <module>ws-handlers</module>
-
         <module>ca-ws-cli</module>
         <module>cc-ws-cli</module>
 
