@@ -9,7 +9,6 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
@@ -17,8 +16,6 @@ import java.util.Set;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
 public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
-
-    private SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
 
     @Override
     public Set<QName> getHeaders() {
@@ -44,9 +41,6 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
 
     private boolean handleOutbound(SOAPMessageContext smc) {
         try {
-            Boolean isServer = false;
-            if (isServer) return true; // TODO: check if server
-
             long timestamp = new Date().getTime();
             final byte array[] = new byte[16];
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
@@ -68,9 +62,6 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
 
     private boolean handleInbound(SOAPMessageContext smc) {
         try {
-            Boolean isServer = true;
-            if (!isServer) return true; // TODO: check if server
-
             SOAPEnvelope env = smc.getMessage().getSOAPPart().getEnvelope();
             SOAPHeader sh = getHeader(env);
             Name name = env.createName("token", "id", "http://supplier.komparator.org/");
@@ -91,7 +82,7 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
 
             addToken(path, token);
 
-            // TODO: Reload after 10 seconds
+            // TODO: Maybe reload after 10 seconds? No need tho
             String CONTEXT_PROPERTY = "token.property";
             smc.put(CONTEXT_PROPERTY, token);
             smc.setScope(CONTEXT_PROPERTY, MessageContext.Scope.APPLICATION);

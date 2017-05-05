@@ -1,23 +1,20 @@
 package org.komparator.supplier.ws;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
-import javax.annotation.Resource;
-import javax.jws.HandlerChain;
-import javax.jws.WebService;
-import javax.xml.ws.handler.MessageContext;
-
-
 import example.ws.handler.SignHandler;
 import org.komparator.supplier.domain.Product;
 import org.komparator.supplier.domain.Purchase;
 import org.komparator.supplier.domain.QuantityException;
 import org.komparator.supplier.domain.Supplier;
 
+import javax.annotation.Resource;
+import javax.jws.HandlerChain;
+import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 
 @WebService(
@@ -69,15 +66,6 @@ public class SupplierPortImpl implements SupplierPortType {
 		String uddiURL = testProps.getProperty("uddi.url");
 		keyAlias = testProps.getProperty("ws.name");
 		String wsURL = testProps.getProperty("ws.url");
-				
-		System.out.println("\n\n\n\n\n URLLLLL \n\n\n"+keyAlias+"\n\n\n\n\n\n");
-		/*0String[] slash_split = url.split("/");
-		String[] dots_split = slash_split[2].split(":");
-		String port = dots_split[1];
-		int server_id = Integer.parseInt(port) % 10;
-
-		//keyAlias = "T50_Supplier" + server_id;*/
-
 		keyStoreFile = "../supplier-ws/src/main/resources/" + keyAlias + ".jks";
 
 		dataToSend = keyAlias + "#" + keyStoreFile;

@@ -7,6 +7,7 @@ import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClientException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
 
+import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import java.util.*;
 
@@ -18,7 +19,7 @@ import java.util.*;
 		targetNamespace = "http://ws.mediator.komparator.org/", 
 		serviceName = "MediatorService"
 )
-
+@HandlerChain(file = "/mediator-ws_handler-chain.xml")
 public class MediatorPortImpl implements MediatorPortType {
 
 	// end point manager
