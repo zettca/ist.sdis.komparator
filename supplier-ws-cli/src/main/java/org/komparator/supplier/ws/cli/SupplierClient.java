@@ -1,24 +1,14 @@
 package org.komparator.supplier.ws.cli;
 
-import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
+import org.komparator.security.handler.SignHandler;
+import org.komparator.supplier.ws.*;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
+import javax.xml.ws.BindingProvider;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.ws.BindingProvider;
-
-import org.komparator.supplier.ws.BadProductId_Exception;
-import org.komparator.supplier.ws.BadProduct_Exception;
-import org.komparator.supplier.ws.BadQuantity_Exception;
-import org.komparator.supplier.ws.BadText_Exception;
-import org.komparator.supplier.ws.InsufficientQuantity_Exception;
-import org.komparator.supplier.ws.ProductView;
-import org.komparator.supplier.ws.PurchaseView;
-import org.komparator.supplier.ws.SupplierPortType;
-import org.komparator.supplier.ws.SupplierService;
-
-import example.ws.handler.SignHandler;
-import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 /**
  * Client port wrapper.

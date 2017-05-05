@@ -1,6 +1,6 @@
 package org.komparator.supplier.ws;
 
-import example.ws.handler.SignHandler;
+import org.komparator.security.handler.SignHandler;
 import org.komparator.supplier.domain.Product;
 import org.komparator.supplier.domain.Purchase;
 import org.komparator.supplier.domain.QuantityException;
