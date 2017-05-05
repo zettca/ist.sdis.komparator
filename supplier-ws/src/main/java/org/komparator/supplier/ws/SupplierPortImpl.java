@@ -57,7 +57,6 @@ public class SupplierPortImpl implements SupplierPortType {
 			try {
 				throw e;
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}

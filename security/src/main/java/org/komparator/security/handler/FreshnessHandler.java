@@ -73,7 +73,7 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
             SOAPElement el = (SOAPElement) it.next();
             String token = el.getValue();
 
-            String path = "tokens.tsv";
+            String path = "target/tokens.tsv";
             if (!validToken(path, token)) { // Rejects for existing token/errors
                 System.out.println("Freshness: Invalid token. Rejecting message!");
                 return false;
@@ -81,7 +81,6 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
 
             addToken(path, token);
 
-            // TODO: Maybe reload after 10 seconds? No need tho
             String CONTEXT_PROPERTY = "token.property";
             smc.put(CONTEXT_PROPERTY, token);
             smc.setScope(CONTEXT_PROPERTY, MessageContext.Scope.APPLICATION);

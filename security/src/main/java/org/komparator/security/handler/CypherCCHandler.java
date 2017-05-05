@@ -105,7 +105,6 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
 
     @Override
     public void close(MessageContext messageContext) {
-        // nothing to clean up
     }
 
     public CAClient setUp(String url) {
@@ -113,7 +112,7 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
             try {
                 ca = new CAClient(url);
             } catch (CAClientException e) {
-                // TODO Auto-generated catch block
+                System.out.println("Could not connect to CA...");
                 e.printStackTrace();
             }
         }
