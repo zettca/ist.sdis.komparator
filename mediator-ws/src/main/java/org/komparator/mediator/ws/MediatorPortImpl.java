@@ -173,7 +173,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		try {
 			CreditCardClient cardClient = new CreditCardClient("http://ws.sd.rnl.tecnico.ulisboa.pt:8080/cc");
 			if(!cardClient.validateNumber(creditCardNr)) {
-				throwInvalidCreditCard_Exception("Invalid card Exception");
+				throwInvalidCreditCard_Exception("Invalid CreditCard.");
 			}
 		} catch (CreditCardClientException e) {
 			System.out.println("Error connecting to CreditCard.");

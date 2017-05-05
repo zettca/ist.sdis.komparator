@@ -72,7 +72,6 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
             }
             SOAPElement el = (SOAPElement) it.next();
             String token = el.getValue();
-            System.out.println("GOT" + token);
 
             String path = "tokens.tsv";
             if (!validToken(path, token)) { // Rejects for existing token/errors

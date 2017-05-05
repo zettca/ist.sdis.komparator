@@ -4,6 +4,7 @@ import org.komparator.security.CryptoUtil;
 import pt.ulisboa.tecnico.sdis.ws.cli.CAClient;
 import pt.ulisboa.tecnico.sdis.ws.cli.CAClientException;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.namespace.QName;
 import javax.xml.soap.*;
 import javax.xml.ws.handler.MessageContext;
@@ -15,8 +16,6 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Iterator;
 import java.util.Set;
-
-import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
 public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
     private CAClient ca = setUp("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca");
@@ -57,7 +56,7 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
             byte[] caBytes = ca.getPublicKey("T50_Mediator");
             PublicKey key = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(caBytes));
 
-            String cypheredCC = CryptoUtil.asymCipher(textCC.getBytes(), key);
+            String cypheredCC = CryptoUtil.asymCipher(DatatypeConverter.parseBase64Binary(textCC), key);
             el.setValue(cypheredCC);
 
         } catch (SOAPException e) {
@@ -92,12 +91,12 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
 
             System.out.println("Cyphered CC is: " + cypheredCC);
 
-            // TODO: Do DeCypher CC
-            String keyPath = "";
-            char[] pass = "WkyodoJT".toCharArray();
-            PrivateKey key = CryptoUtil.getPrivateKeyFromKeystore(keyPath, pass, "T50_Mediator", pass);
+            String wsName = "T50_Mediator";
+            String keyPath = "src/main/resources/" + wsName + ".jks";
+            char[] pwd = "WkyodoJT".toCharArray();
+            PrivateKey key = CryptoUtil.getPrivateKeyFromKeystore(keyPath, pwd, wsName.toLowerCase(), pwd);
             byte[] bytesCC = CryptoUtil.asymDecipher(el.getValue(), key);
-            String textCC = printBase64Binary(bytesCC);
+            String textCC = DatatypeConverter.printBase64Binary(bytesCC);
             el.setValue(textCC);
 
             System.out.println("DeCyphered CC is: " + textCC);
