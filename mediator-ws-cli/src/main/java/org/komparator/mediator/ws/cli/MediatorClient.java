@@ -1,29 +1,13 @@
 package org.komparator.mediator.ws.cli;
 
-import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
+import org.komparator.mediator.ws.*;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
+import javax.xml.ws.BindingProvider;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.ws.BindingProvider;
-
-import org.komparator.mediator.ws.CartView;
-import org.komparator.mediator.ws.EmptyCart_Exception;
-import org.komparator.mediator.ws.InvalidCartId_Exception;
-import org.komparator.mediator.ws.InvalidCreditCard_Exception;
-import org.komparator.mediator.ws.InvalidItemId_Exception;
-import org.komparator.mediator.ws.InvalidQuantity_Exception;
-import org.komparator.mediator.ws.InvalidText_Exception;
-import org.komparator.mediator.ws.ItemIdView;
-import org.komparator.mediator.ws.ItemView;
-import org.komparator.mediator.ws.MediatorPortType;
-import org.komparator.mediator.ws.MediatorService;
-import org.komparator.mediator.ws.NotEnoughItems_Exception;
-import org.komparator.mediator.ws.ShoppingResultView;
-
-import org.komparator.mediator.ws.*;
-
-import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 
 /**

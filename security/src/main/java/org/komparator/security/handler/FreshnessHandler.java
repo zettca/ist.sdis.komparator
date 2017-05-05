@@ -100,7 +100,6 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.defaultCharset())); // charset?
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println("Read Line: " + line);
                 if (line.trim().equals(token)) {
                     System.out.println("Token found! Rejecting...");
                     return false;
