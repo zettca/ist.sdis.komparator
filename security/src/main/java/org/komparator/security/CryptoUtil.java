@@ -16,8 +16,6 @@ import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
 
 public class CryptoUtil {
-
-    // TODO add security helper methods
     public static String asymCipher(byte[] plainBytes, PublicKey publicKey) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);

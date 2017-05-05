@@ -28,7 +28,7 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
     @Override
     public boolean handleMessage(SOAPMessageContext smc) {
         Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-        System.out.println("\n\n\tCypherCC Handler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
+        System.out.println("\n\tCypherCC Handler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
         return (outbound) ? handleOutbound(smc) : handleInbound(smc);
     }
 
@@ -43,12 +43,7 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
             SOAPElement el = (SOAPElement) it.next();
             name = env.createName("creditCardNr");
             it = el.getChildElements(name);
-            if (!it.hasNext()) {
-                System.out.println("No creditCardNr entry? Totally unexpected...");
-                return false;
-            }
-
-            /* Mediator-cli sending to Mediator */
+            if (!it.hasNext()) return true; // creditCardNr is null
 
             el = (SOAPElement) it.next();
             String textCC = el.getValue();
@@ -79,27 +74,20 @@ public class CypherCCHandler implements SOAPHandler<SOAPMessageContext> {
             SOAPElement el = (SOAPElement) it.next();
             name = env.createName("creditCardNr");
             it = el.getChildElements(name);
-            if (!it.hasNext()) {
-                System.out.println("No creditCardNr entry? Totally unexpected...");
-                return false;
-            }
+            if (!it.hasNext()) return true; // creditCardNr is null
 
             el = (SOAPElement) it.next();
             String cypheredCC = el.getValue();
 
-            /* Mediator-cli sending to Mediator */
-
-            System.out.println("Cyphered CC is: " + cypheredCC);
 
             String wsName = "T50_Mediator";
             String keyPath = "src/main/resources/" + wsName + ".jks";
             char[] pwd = "WkyodoJT".toCharArray();
+
             PrivateKey key = CryptoUtil.getPrivateKeyFromKeystore(keyPath, pwd, wsName.toLowerCase(), pwd);
-            byte[] bytesCC = CryptoUtil.asymDecipher(el.getValue(), key);
+            byte[] bytesCC = CryptoUtil.asymDecipher(cypheredCC, key);
             String textCC = DatatypeConverter.printBase64Binary(bytesCC);
             el.setValue(textCC);
-
-            System.out.println("DeCyphered CC is: " + textCC);
 
         } catch (SOAPException e) {
             e.printStackTrace();

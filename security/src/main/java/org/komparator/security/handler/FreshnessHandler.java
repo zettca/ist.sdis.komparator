@@ -25,7 +25,7 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
     @Override
     public boolean handleMessage(SOAPMessageContext smc) {
         Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-        System.out.println("\n\n\tFreshness Handler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
+        System.out.println("\n\tFreshness Handler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
         return (outbound) ? handleOutbound(smc) : handleInbound(smc);
     }
 

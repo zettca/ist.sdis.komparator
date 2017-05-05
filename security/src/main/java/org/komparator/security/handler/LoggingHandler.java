@@ -66,8 +66,8 @@ public class LoggingHandler implements SOAPHandler<SOAPMessageContext> {
 	 */
 	private void logToSystemOut(SOAPMessageContext smc) {
 		Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-		System.out.println("\n\n\t[" + dateFormatter.format(new Date()) + "]");
-		System.out.println("\tLoggingHandler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
+		System.out.print("\n\tLoggingHandler: Handling " + ((outbound) ? "OUT" : "IN") + "bound message.");
+		System.out.println("  at " + dateFormatter.format(new Date()));
 
 		SOAPMessage message = smc.getMessage();
 		try {

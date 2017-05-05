@@ -29,16 +29,8 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
     private CAClient ca;
 
     public static final String REQUEST_PROPERTY = "my.request.property";
-
-    public static final String RESPONSE_PROPERTY = "my.response.property";
-
-    public static final String REQUEST_HEADER = "myRequestHeader";
-    public static final String REQUEST_NS = "urn:example";
-
-    public static final String RESPONSE_HEADER = "myResponseHeader";
-    public static final String RESPONSE_NS = REQUEST_NS;
-
-    public static final String CONTEXT_PROPERTY = "my.property";
+    private static final String REQUEST_HEADER = "myRequestHeader";
+    private static final String REQUEST_NS = "urn:example";
 
     public Set<QName> getHeaders() {
         return null;
@@ -47,14 +39,13 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
     @Override
     public boolean handleMessage(SOAPMessageContext smc) {
         Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-        System.out.println("\n\n\tSign Handler: Handling " + ((outboundElement) ? "OUT" : "IN") + "bound message.");
+        System.out.println("\n\tSign Handler: Handling " + ((outboundElement) ? "OUT" : "IN") + "bound message.");
 
         ca = setUp("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca");
 
         try {
             SOAPMessage msg = smc.getMessage();
-            SOAPPart sp = msg.getSOAPPart();
-            SOAPEnvelope se = sp.getEnvelope();
+            SOAPEnvelope se = msg.getSOAPPart().getEnvelope();
             SOAPHeader sh = se.getHeader();
 
             // check header
@@ -62,8 +53,6 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
                 System.out.println("Header not found.");
                 return true;
             }
-            SOAPHeaderElement headerElement = null;
-            SOAPElement element = null;
 
             if (outboundElement) {
                 String dataReceived = (String) smc.get(REQUEST_PROPERTY);
@@ -84,7 +73,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
                     System.out.println("Header element not found.");
                     return true;
                 }
-                element = (SOAPElement) it.next();
+                SOAPElement element = (SOAPElement) it.next();
 
                 // get header element value
                 String timestamp = element.getValue();
@@ -99,12 +88,10 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 
 
                 // make digital signature hashing
-                byte[] digitalSignature = null;
+                PrivateKey pk = CryptoUtil.getPrivateKeyFromKeystore(keyStoreFile, KeyStorePassword.toCharArray(),
+                        keyAlias.toLowerCase(), keyPassword.toCharArray());
 
-                PrivateKey pk = CryptoUtil.getPrivateKeyFromKeystore(keyStoreFile, KeyStorePassword.toCharArray()
-                        , keyAlias.toLowerCase(), keyPassword.toCharArray());
-
-                digitalSignature = CryptoUtil.makeDigitalSignature(byteMessage, pk);
+                byte[] digitalSignature = CryptoUtil.makeDigitalSignature(byteMessage, pk);
 
                 String signedMessageText = printBase64Binary(digitalSignature);
 
@@ -113,7 +100,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
 
                 // add header element (name, namespace prefix, namespace)
                 name = se.createName(REQUEST_HEADER, "e", REQUEST_NS);
-                headerElement = sh.addHeaderElement(name);
+                SOAPHeaderElement headerElement = sh.addHeaderElement(name);
                 headerElement.addTextNode(dataToSend);
 
 
@@ -126,7 +113,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
                     System.out.printf("Header element %s not found.%n", REQUEST_HEADER);
                     return true; //FALSEEEEEE
                 }
-                element = (SOAPElement) it.next();
+                SOAPElement element = (SOAPElement) it.next();
 
                 // get header element value
                 String dataReceived = element.getValue();
@@ -158,15 +145,10 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
                 byte[] originalMessage = parseBase64Binary(messageText);
 
                 byte[] publicKeyInBytes = ca.getPublicKey(keyAlias.toLowerCase());
-                PublicKey publicKey = null;
-
-                publicKey = KeyFactory.getInstance("RSA").
-                        generatePublic(new X509EncodedKeySpec(publicKeyInBytes));
+                PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeyInBytes));
 
                 // verify signature
-                boolean isValid = false;
-
-                isValid = CryptoUtil.verifyDigitalSignature(digitalSignature, originalMessage, publicKey);
+                boolean isValid = CryptoUtil.verifyDigitalSignature(digitalSignature, originalMessage, publicKey);
 
                 if (isValid) {
                     System.out.println("The digital signature is valid");
@@ -190,8 +172,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
             try {
                 ca = new CAClient(url);
             } catch (CAClientException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                System.out.println("Error connecting to CA...");
             }
         }
         return ca;
