@@ -108,6 +108,8 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
             return true;
         } catch (FileNotFoundException e) {
             System.out.println("File does not exist!");
+            // TODO: create file
+            // validToken(path, token);
         } catch (IOException e) {
             System.out.println("Error reading file!");
         }

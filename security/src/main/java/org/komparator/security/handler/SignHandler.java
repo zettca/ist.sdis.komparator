@@ -51,7 +51,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
             // check header
             if (sh == null) {
                 System.out.println("Header not found.");
-                return true;
+                return false;
             }
 
             if (outboundElement) {
@@ -111,7 +111,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
                 // check header element
                 if (!it.hasNext()) {
                     System.out.printf("Header element %s not found.%n", REQUEST_HEADER);
-                    return true; //FALSEEEEEE
+                    return false; //FALSEEEEEE
                 }
                 SOAPElement element = (SOAPElement) it.next();
 
@@ -129,8 +129,7 @@ public class SignHandler implements SOAPHandler<SOAPMessageContext> {
                 String entityCertificateString = ca.getCertificate(keyAlias.toLowerCase());
                 byte[] entityCertificateBytes = parseBase64Binary(entityCertificateString);
                 byte[] caPublicKeyBytes = ca.getPublicKey("ca");
-                PublicKey caPublicKey = KeyFactory.getInstance("RSA").
-                        generatePublic(new X509EncodedKeySpec(caPublicKeyBytes));
+                PublicKey caPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(caPublicKeyBytes));
 
                 CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 
