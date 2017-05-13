@@ -106,8 +106,11 @@ public class MediatorClient implements MediatorPortType {
 	
 
     // remote invocation methods ----------------------------------------------
-    
-    
+
+    @Override
+    public void imAlive() {
+        port.imAlive();
+    }
     
     @Override
 	public void clear() {

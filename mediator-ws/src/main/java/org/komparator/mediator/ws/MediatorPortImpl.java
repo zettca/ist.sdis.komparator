@@ -218,6 +218,15 @@ public class MediatorPortImpl implements MediatorPortType {
 	// Auxiliary operations --------------------------------------------------
 
 	@Override
+	public void imAlive() {
+		boolean isPrimary = true; // TODO: get primary
+		if (!isPrimary) {
+			long timestamp = new Date().getTime();
+			// TODO: save timestamp accordingly
+		}
+	}
+
+	@Override
 	public String ping(String arg0) {
 		StringBuilder builder = new StringBuilder();
 

@@ -21,6 +21,8 @@ wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
         <xs:schema
             targetNamespace="http://ws.mediator.komparator.org/"
             version="1.0" >
+            <xs:element name="imAlive" type="tns:imAlive"/>
+
             <xs:element name="EmptyCart" type="tns:EmptyCart"/>
 
             <xs:element name="InvalidCartId" type="tns:InvalidCartId"/>
@@ -66,6 +68,10 @@ wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
             <xs:element name="shopHistory" type="tns:shopHistory"/>
 
             <xs:element name="shopHistoryResponse" type="tns:shopHistoryResponse"/>
+
+            <xs:complexType name="imAlive">
+                <xs:sequence/>
+            </xs:complexType>
 
             <xs:complexType name="listCarts">
                 <xs:sequence/>
@@ -248,6 +254,9 @@ wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
     </types>
 
     <!--  Messages (use elements defined in the schema) -->
+    <message name="imAlive">
+        <part name="parameters" element="tns:imAlive"/>
+    </message>
     <message name="clear">
         <part name="parameters" element="tns:clear"/>
     </message>
@@ -320,6 +329,9 @@ wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
 
     <!-- Port Type (Interface) -->
     <portType name="MediatorPortType">
+        <operation name="imAlive">
+            <input message="tns:imAlive"/>
+        </operation>
         <operation name="clear">
             <input wsam:Action="http://ws.mediator.komparator.org/Mediator/clearRequest" message="tns:clear"/>
             <output wsam:Action="http://ws.mediator.komparator.org/Mediator/clearResponse" message="tns:clearResponse"/>
@@ -366,6 +378,12 @@ wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
     <!-- SOAP/HTTP Binding -->
     <binding name="MediatorPortSoapHttpBinding" type="tns:MediatorPortType">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <operation name="imAlive">
+            <soap:operation soapAction=""/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
         <operation name="clear">
             <soap:operation soapAction=""/>
             <input>
