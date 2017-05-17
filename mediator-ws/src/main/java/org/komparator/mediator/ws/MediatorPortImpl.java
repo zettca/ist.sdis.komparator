@@ -29,6 +29,7 @@ public class MediatorPortImpl implements MediatorPortType {
 	private List<ShoppingResultView> shopHistory;
 
 	private int shopId=0;
+	private long aliveTimestamp;
 
 	public MediatorPortImpl() {
 	}
@@ -219,10 +220,8 @@ public class MediatorPortImpl implements MediatorPortType {
 
 	@Override
 	public void imAlive() {
-		boolean isPrimary = true; // TODO: get primary
-		if (!isPrimary) {
-			long timestamp = new Date().getTime();
-			// TODO: save timestamp accordingly
+		if (!endpointManager.isPrimary) { // Backup Mediator
+			aliveTimestamp = new Date().getTime();
 		}
 	}
 

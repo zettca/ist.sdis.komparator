@@ -21,6 +21,8 @@ public class MediatorEndpointManager {
 	/** Web Service location to publish */
 	private String wsURL = null;
 
+	protected boolean isPrimary;
+
 	/** Port implementation */
 	private MediatorPortImpl portImpl = new MediatorPortImpl(this);
 
@@ -129,7 +131,15 @@ public class MediatorEndpointManager {
 					System.out.printf("Publishing '%s' to UDDI at %s%n", wsName, uddiURL);
 				}
 				uddiNaming = new UDDINaming(uddiURL);
-				uddiNaming.rebind(wsName, wsURL);
+				String mediatorUrl = uddiNaming.lookup(wsName);
+				if (mediatorUrl == null) { // No Mediator running
+					isPrimary = true;
+					System.out.println("I am the PRIMARY Mediator!");
+					uddiNaming.rebind(wsName, wsURL);
+				} else { // Mediator already running. Run as backup
+					isPrimary = false;
+					System.out.println("I am the BACKUP Mediator!");
+				}
 			}
 		} catch (Exception e) {
 			uddiNaming = null;
