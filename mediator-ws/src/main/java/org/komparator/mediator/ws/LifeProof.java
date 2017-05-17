@@ -2,30 +2,30 @@ package org.komparator.mediator.ws;
 
 import org.komparator.mediator.ws.cli.MediatorClient;
 import org.komparator.mediator.ws.cli.MediatorClientException;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 
 import java.util.Date;
-import java.util.List;
 import java.util.TimerTask;
 
 public class LifeProof extends TimerTask {
-    public static final String BACKUP_URL = "http://localhost:8072/mediator-ws/endpoint";
-    public static final long PING_INTERVAL = 5 * 1000;
-    public static final long PING_TIMEOUT = (5 + 2) * 1000;
+    static final String BACKUP_URL = "http://localhost:8072/mediator-ws/endpoint";
+    static final long PING_INTERVAL = 5 * 1000;
+    static final long PING_OFFSET = 2 * 1000;
     private MediatorEndpointManager endpoint;
 
-    public LifeProof(MediatorEndpointManager endpoint) {
+    LifeProof(MediatorEndpointManager endpoint) {
         this.endpoint = endpoint;
     }
 
     @Override
     public void run() {
-        if (this.endpoint.isPrimary) {
-            System.out.println("Sending imAlive signal to backup Mediator...");
+        if (endpoint.isPrimary) {
+            System.out.println("Primary: Sending imAlive signal to BackupMediator...");
             handlePrimary();
         } else {
-            System.out.println("Backup mediator stuffs...");
             long timeDiff = new Date().getTime() - this.endpoint.lastAliveTime;
-            if (timeDiff > PING_TIMEOUT) {
+            if (timeDiff > PING_INTERVAL + PING_OFFSET) {
+                System.out.println("Mediator did not send imAlive. Taking over...");
                 handleBackupTakeover();
             }
         }
@@ -33,19 +33,20 @@ public class LifeProof extends TimerTask {
 
     private void handlePrimary() {
         try {
-            MediatorPortType port = endpoint.getPort();
-            MediatorClient backupMediatorClient = new MediatorClient(BACKUP_URL);
-            List<CartView> carts = port.listCarts();
-            List<ShoppingResultView> shopHistory = port.shopHistory();
-            backupMediatorClient.imAlive();
-            backupMediatorClient.updateCart(carts);
-            backupMediatorClient.updateShopHistory(shopHistory);
+            new MediatorClient(BACKUP_URL).imAlive();
         } catch (MediatorClientException e) {
             System.out.println("Error connecting to backup Mediator...");
         }
     }
 
     private void handleBackupTakeover() {
-        // TODO: register on UDDI and inform front-end
+        try {
+            endpoint.getUddiNaming().rebind(endpoint.getWsName(), BACKUP_URL);
+            endpoint.isPrimary = true;
+            MediatorApp.timer.cancel();
+            MediatorApp.timer.purge();
+        } catch (UDDINamingException e) {
+            System.out.println("Error rebinding UDDI for " + endpoint.getWsName());
+        }
     }
 }

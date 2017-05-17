@@ -14,8 +14,12 @@ public class MediatorEndpointManager {
 	private String wsName = null;
 
 	/** Get Web Service UDDI publication name */
-	public String getWsName() {
+	String getWsName() {
 		return wsName;
+	}
+
+	String getWsURL() {
+		return wsURL;
 	}
 
 	/** Web Service location to publish */

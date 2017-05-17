@@ -237,10 +237,7 @@ public class MediatorPortImpl implements MediatorPortType {
 
 	@Override
 	public void imAlive() {
-		if (!endpointManager.isPrimary) { // Backup Mediator
-			endpointManager.lastAliveTime = new Date().getTime();
-			// TODO: if > 5 seconds, do what? Shouldn't happen tho
-		}
+		endpointManager.lastAliveTime = new Date().getTime();
 	}
 
 	@Override

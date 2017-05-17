@@ -3,6 +3,7 @@ package org.komparator.mediator.ws;
 import java.util.Timer;
 
 public class MediatorApp {
+	static Timer timer;
 
 	public static void main(String[] args) throws Exception {
 		// Check arguments
@@ -17,7 +18,7 @@ public class MediatorApp {
 
 		// Create server implementation object, according to options
 		MediatorEndpointManager endpoint = null;
-		Timer timer = new Timer(true);
+		timer = new Timer(true);
 		if (args.length == 1) {
 			wsURL = args[0];
 			endpoint = new MediatorEndpointManager(wsURL);
