@@ -29,7 +29,6 @@ public class MediatorPortImpl implements MediatorPortType {
 	private List<ShoppingResultView> shopHistory;
 
 	private int shopId=0;
-	private long aliveTimestamp;
 
 	public MediatorPortImpl() {
 	}
@@ -221,8 +220,22 @@ public class MediatorPortImpl implements MediatorPortType {
 	@Override
 	public void imAlive() {
 		if (!endpointManager.isPrimary) { // Backup Mediator
-			aliveTimestamp = new Date().getTime();
+			endpointManager.lastAliveTime = new Date().getTime();
+			// TODO: if > 5 seconds, do what? Shouldn't happen tho
 		}
+	}
+
+	@Override
+	public void updateCart(List<CartView> carts) {
+		this.carts.clear();
+		for (CartView cart : carts) {
+			this.carts.put(cart.cartId, cart);
+		}
+	}
+
+	@Override
+	public void updateShopHistory(List<ShoppingResultView> shopHistory) {
+		this.shopHistory = shopHistory;
 	}
 
 	@Override

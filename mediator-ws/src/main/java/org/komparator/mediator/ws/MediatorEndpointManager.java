@@ -21,7 +21,8 @@ public class MediatorEndpointManager {
 	/** Web Service location to publish */
 	private String wsURL = null;
 
-	protected boolean isPrimary;
+	boolean isPrimary;
+	long lastAliveTime;
 
 	/** Port implementation */
 	private MediatorPortImpl portImpl = new MediatorPortImpl(this);
