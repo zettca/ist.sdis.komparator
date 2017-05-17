@@ -31,7 +31,7 @@ public class MediatorApp {
 
 		try {
 			endpoint.start();
-			timer.schedule(new LifeProof(endpoint), 0, 5000);
+			timer.schedule(new LifeProof(endpoint), 0, LifeProof.PING_INTERVAL);
 			endpoint.awaitConnections();
 		} finally {
 			endpoint.stop();

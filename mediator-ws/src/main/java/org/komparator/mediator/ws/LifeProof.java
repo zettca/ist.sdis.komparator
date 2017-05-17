@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.TimerTask;
 
 public class LifeProof extends TimerTask {
-    private static final long TIMEOUT_LIMIT = (5 + 2) * 1000;
-    private static final String BACKUP_URL = "http://localhost:8072/mediator-ws/endpoint";
+    public static final String BACKUP_URL = "http://localhost:8072/mediator-ws/endpoint";
+    public static final long PING_INTERVAL = 5 * 1000;
+    public static final long PING_TIMEOUT = (5 + 2) * 1000;
     private MediatorEndpointManager endpoint;
 
     public LifeProof(MediatorEndpointManager endpoint) {
@@ -24,7 +25,7 @@ public class LifeProof extends TimerTask {
         } else {
             System.out.println("Backup mediator stuffs...");
             long timeDiff = new Date().getTime() - this.endpoint.lastAliveTime;
-            if (timeDiff > TIMEOUT_LIMIT) {
+            if (timeDiff > PING_TIMEOUT) {
                 handleBackupTakeover();
             }
         }

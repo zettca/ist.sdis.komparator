@@ -1,5 +1,7 @@
 package org.komparator.mediator.ws;
 
+import org.komparator.mediator.ws.cli.MediatorClient;
+import org.komparator.mediator.ws.cli.MediatorClientException;
 import org.komparator.supplier.ws.*;
 import org.komparator.supplier.ws.cli.SupplierClient;
 import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClient;
@@ -148,6 +150,14 @@ public class MediatorPortImpl implements MediatorPortType {
 		} else {
 			throwNotEnoughItems_Exception("Supplier does not have enough items in stock");
 		}
+
+		if (endpointManager.isPrimary) {
+			try {
+				new MediatorClient(LifeProof.BACKUP_URL).updateCart(new ArrayList<>(carts.values()));
+			} catch (MediatorClientException e) {
+				System.out.println("Error connecting to backup.");
+			}
+		}
 	}
 
 	@Override
@@ -211,6 +221,14 @@ public class MediatorPortImpl implements MediatorPortType {
 		shopId++;
 		shopHistory.add(shopRes);
 		carts.remove(cartId);
+
+		if (endpointManager.isPrimary) {
+			try {
+				new MediatorClient(LifeProof.BACKUP_URL).updateShopHistory(shopHistory);
+			} catch (MediatorClientException e) {
+				System.out.println("Error connecting to backup.");
+			}
+		}
 
 		return shopRes;
 	}
