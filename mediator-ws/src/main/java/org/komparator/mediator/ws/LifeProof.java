@@ -33,7 +33,8 @@ public class LifeProof extends TimerTask {
 
     private void handlePrimary() {
         try {
-            new MediatorClient(BACKUP_URL).imAlive();
+            MediatorClient mediatorClient = new MediatorClient(BACKUP_URL);
+            mediatorClient.imAlive();
         } catch (MediatorClientException e) {
             System.out.println("Error connecting to backup Mediator...");
         }
@@ -45,6 +46,7 @@ public class LifeProof extends TimerTask {
             endpoint.isPrimary = true;
             MediatorApp.timer.cancel();
             MediatorApp.timer.purge();
+            this.cancel();
         } catch (UDDINamingException e) {
             System.out.println("Error rebinding UDDI for " + endpoint.getWsName());
         }

@@ -23,9 +23,11 @@
 
         <mainclass>org.komparator.mediator.ws.cli.MediatorClientApp</mainclass>
 
+        <ws.i>1</ws.i>
         <group.id>T50</group.id>
         <ws.name>${group.id}_Mediator</ws.name>
-        <ws.url>http://localhost:8080/mediator-ws/endpoint</ws.url>
+        <ws.port>807${ws.i}</ws.port>
+        <ws.url>http://localhost:${ws.port}/mediator-ws/endpoint</ws.url>
 
         <uddi.enabled>false</uddi.enabled>
         <uddi.url>http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/</uddi.url>
