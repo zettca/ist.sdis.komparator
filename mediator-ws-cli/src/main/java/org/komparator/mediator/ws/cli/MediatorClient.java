@@ -96,12 +96,10 @@ public class MediatorClient implements MediatorPortType {
     private void handleThings() {
         try {
             uddiLookup();
+            createStub();
         } catch (MediatorClientException e) {
-            System.out.println("Could not contact UDDI");
             System.out.println(e.getMessage());
         }
-
-        createStub();
     }
 
     // remote invocation methods ----------------------------------------------
@@ -122,48 +120,48 @@ public class MediatorClient implements MediatorPortType {
     }
     
     @Override
-	public void clear() {
-    	port.clear();
-	}
+    public void clear() {
+        port.clear();
+    }
 
     @Override
-	public String ping(String arg0) {
-		return port.ping(arg0);
-	}
+    public String ping(String arg0) {
+        return port.ping(arg0);
+    }
 
     @Override
-	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
+    public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
         handleThings();
         return port.searchItems(descText);
     }
 
     @Override
-	public List<CartView> listCarts() {
-		return port.listCarts();
-	}
-
-	@Override
-	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
+    public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
         handleThings();
         return port.getItems(productId);
     }
 
-	@Override
-	public ShoppingResultView buyCart(String cartId, String creditCardNr)
-			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
+    @Override
+    public ShoppingResultView buyCart(String cartId, String creditCardNr)
+            throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
         handleThings();
         return port.buyCart(cartId, creditCardNr);
     }
 
-	@Override
-	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
-			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+    @Override
+    public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
+            InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
         handleThings();
         port.addToCart(cartId, itemId, itemQty);
     }
 
-	@Override
-	public List<ShoppingResultView> shopHistory() {
-		return port.shopHistory();
-	}
+    @Override
+    public List<CartView> listCarts() {
+        return port.listCarts();
+    }
+
+    @Override
+    public List<ShoppingResultView> shopHistory() {
+        return port.shopHistory();
+    }
 }
