@@ -66,10 +66,8 @@ public class FreshnessHandler implements SOAPHandler<SOAPMessageContext> {
             SOAPHeader sh = getHeader(env);
             Name name = env.createName("token", "id", "http://supplier.komparator.org/");
             Iterator it = sh.getChildElements(name);
-            if (!it.hasNext()) {
-                System.out.println("Freshness: Header element not found.");
-                return true;
-            }
+            if (!it.hasNext()) return true;
+
             SOAPElement el = (SOAPElement) it.next();
             String token = el.getValue();
 

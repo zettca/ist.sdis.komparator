@@ -4,6 +4,9 @@
             <handler-class>org.komparator.security.handler.LoggingHandler</handler-class>
         </handler>
         <handler>
+            <handler-class>org.komparator.security.handler.FreshnessHandler</handler-class>
+        </handler>
+        <handler>
             <handler-class>org.komparator.security.handler.CypherCCHandler</handler-class>
         </handler>
         <handler>

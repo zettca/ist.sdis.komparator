@@ -7,7 +7,6 @@ import javax.xml.ws.BindingProvider;
 import java.util.List;
 import java.util.Map;
 
-
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 
@@ -53,7 +52,7 @@ public class MediatorClient implements MediatorPortType {
     }
 
     /** constructor with provided web service URL */
-    public MediatorClient(String wsURL) throws MediatorClientException {
+    public MediatorClient(String wsURL) {
         this.wsURL = wsURL;
         createStub();
     }
@@ -230,7 +229,6 @@ public class MediatorClient implements MediatorPortType {
                 System.out.println("Thread not put to sleep:" + e1.getMessage());
             }
             handleThings();
-            System.out.println("\n\n\n\n\n" + wsURL + "\n\n\n");
             port.addToCart(cartId, itemId, itemQty);
         }
 

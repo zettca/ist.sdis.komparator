@@ -1,7 +1,6 @@
 package org.komparator.mediator.ws;
 
 import org.komparator.mediator.ws.cli.MediatorClient;
-import org.komparator.mediator.ws.cli.MediatorClientException;
 import org.komparator.supplier.ws.*;
 import org.komparator.supplier.ws.cli.SupplierClient;
 import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClient;
@@ -152,11 +151,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		}
 
 		if (endpointManager.isPrimary && !endpointManager.getWsURL().equals(LifeProof.BACKUP_URL)) {
-			try {
-				new MediatorClient(LifeProof.BACKUP_URL).updateCart(new ArrayList<>(carts.values()));
-			} catch (MediatorClientException e) {
-				System.out.println("Error connecting to backup.");
-			}
+			new MediatorClient(LifeProof.BACKUP_URL).updateCart(new ArrayList<>(carts.values()));
 		}
 	}
 
@@ -223,11 +218,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		carts.remove(cartId);
 
 		if (endpointManager.isPrimary && !endpointManager.getWsURL().equals(LifeProof.BACKUP_URL)) {
-			try {
-				new MediatorClient(LifeProof.BACKUP_URL).updateShopHistory(shopHistory);
-			} catch (MediatorClientException e) {
-				System.out.println("Error connecting to backup.");
-			}
+			new MediatorClient(LifeProof.BACKUP_URL).updateShopHistory(shopHistory);
 		}
 
 		return shopRes;

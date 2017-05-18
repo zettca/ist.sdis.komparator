@@ -1,7 +1,6 @@
 package org.komparator.mediator.ws;
 
 import org.komparator.mediator.ws.cli.MediatorClient;
-import org.komparator.mediator.ws.cli.MediatorClientException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 
 import java.util.Date;
@@ -21,22 +20,14 @@ public class LifeProof extends TimerTask {
     public void run() {
         if (endpoint.isPrimary) {
             System.out.println("Primary: Sending imAlive signal to BackupMediator...");
-            handlePrimary();
+            new MediatorClient(BACKUP_URL).imAlive();
+
         } else {
             long timeDiff = new Date().getTime() - this.endpoint.lastAliveTime;
             if (timeDiff > PING_INTERVAL + PING_OFFSET) {
                 System.out.println("Mediator did not send imAlive. Taking over...");
                 handleBackupTakeover();
             }
-        }
-    }
-
-    private void handlePrimary() {
-        try {
-            MediatorClient mediatorClient = new MediatorClient(BACKUP_URL);
-            mediatorClient.imAlive();
-        } catch (MediatorClientException e) {
-            System.out.println("Error connecting to backup Mediator...");
         }
     }
 
