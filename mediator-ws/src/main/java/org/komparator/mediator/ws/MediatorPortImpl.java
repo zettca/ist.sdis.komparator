@@ -151,7 +151,7 @@ public class MediatorPortImpl implements MediatorPortType {
 			throwNotEnoughItems_Exception("Supplier does not have enough items in stock");
 		}
 
-		if (endpointManager.isPrimary) {
+		if (endpointManager.isPrimary && !endpointManager.getWsURL().equals(LifeProof.BACKUP_URL)) {
 			try {
 				new MediatorClient(LifeProof.BACKUP_URL).updateCart(new ArrayList<>(carts.values()));
 			} catch (MediatorClientException e) {
@@ -222,7 +222,7 @@ public class MediatorPortImpl implements MediatorPortType {
 		shopHistory.add(shopRes);
 		carts.remove(cartId);
 
-		if (endpointManager.isPrimary) {
+		if (endpointManager.isPrimary && !endpointManager.getWsURL().equals(LifeProof.BACKUP_URL)) {
 			try {
 				new MediatorClient(LifeProof.BACKUP_URL).updateShopHistory(shopHistory);
 			} catch (MediatorClientException e) {

@@ -29,7 +29,7 @@
         <ws.port>807${ws.i}</ws.port>
         <ws.url>http://localhost:${ws.port}/mediator-ws/endpoint</ws.url>
 
-        <uddi.enabled>false</uddi.enabled>
+        <uddi.enabled>true</uddi.enabled>
         <uddi.url>http://t50:WkyodoJT@uddi.sd.rnl.tecnico.ulisboa.pt:9090/</uddi.url>
     </properties>
 

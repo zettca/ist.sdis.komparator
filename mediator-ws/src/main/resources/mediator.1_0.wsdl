@@ -528,7 +528,7 @@ wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
     <!-- Service -->
     <service name="MediatorService">
         <port name="MediatorPort" binding="tns:MediatorPortSoapHttpBinding">
-            <soap:address location="http://localhost:8080/mediator-ws/endpoint"/>
+            <soap:address location="http://localhost:8071/mediator-ws/endpoint"/>
         </port>
     </service>
 

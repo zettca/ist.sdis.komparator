@@ -65,32 +65,22 @@ public class MediatorClient implements MediatorPortType {
     /** UDDI lookup */
     private void uddiLookup() throws MediatorClientException {
         try {
-            if (verbose)
-                System.out.printf("Contacting UDDI at %s%n", uddiURL);
             UDDINaming uddiNaming = new UDDINaming(uddiURL);
-
-            if (verbose)
-                System.out.printf("Looking for '%s'%n", wsName);
             wsURL = uddiNaming.lookup(wsName);
-
         } catch (Exception e) {
-            String msg = String.format("Client failed lookup on UDDI at %s!",
-                    uddiURL);
+            String msg = String.format("Client failed lookup on UDDI at %s!", uddiURL);
             throw new MediatorClientException(msg, e);
         }
 
         if (wsURL == null) {
-            String msg = String.format(
-                    "Service with name %s not found on UDDI at %s", wsName,
-                    uddiURL);
+            String msg = String.format("Service with name %s not found on UDDI at %s", wsName, uddiURL);
             throw new MediatorClientException(msg);
         }
     }
 
     /** Stub creation and configuration */
     private void createStub() {
-        if (verbose)
-            System.out.println("Creating stub ...");
+        if (verbose) System.out.println("Creating stub ...");
 
         service = new MediatorService();
         port = service.getMediatorPort();
@@ -103,7 +93,16 @@ public class MediatorClient implements MediatorPortType {
         }
     }
 
-	
+    private void handleThings() {
+        try {
+            uddiLookup();
+        } catch (MediatorClientException e) {
+            System.out.println("Could not contact UDDI");
+            System.out.println(e.getMessage());
+        }
+
+        createStub();
+    }
 
     // remote invocation methods ----------------------------------------------
 
@@ -134,8 +133,9 @@ public class MediatorClient implements MediatorPortType {
 
     @Override
 	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
-		return port.searchItems(descText);
-	}
+        handleThings();
+        return port.searchItems(descText);
+    }
 
     @Override
 	public List<CartView> listCarts() {
@@ -144,24 +144,26 @@ public class MediatorClient implements MediatorPortType {
 
 	@Override
 	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
-		return port.getItems(productId);
-	}
+        handleThings();
+        return port.getItems(productId);
+    }
 
 	@Override
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
-		return port.buyCart(cartId, creditCardNr);
-	}
+        handleThings();
+        return port.buyCart(cartId, creditCardNr);
+    }
 
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-		port.addToCart(cartId, itemId, itemQty);
-	}
+        handleThings();
+        port.addToCart(cartId, itemId, itemQty);
+    }
 
 	@Override
 	public List<ShoppingResultView> shopHistory() {
 		return port.shopHistory();
 	}
- 
 }
