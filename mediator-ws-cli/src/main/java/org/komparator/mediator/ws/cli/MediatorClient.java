@@ -20,7 +20,8 @@ public class MediatorClient implements MediatorPortType {
 
     static final long PING_INTERVAL = 5 * 1000;
     static final long PING_OFFSET = 2 * 1000;
-
+    
+    private FrontEnd frontEnd;
     /** WS service */
     MediatorService service = null;
 
@@ -63,6 +64,7 @@ public class MediatorClient implements MediatorPortType {
         this.wsName = wsName;
         uddiLookup();
         createStub();
+        this.frontEnd = new FrontEnd(this);
     }
 
     /** UDDI lookup */
@@ -96,7 +98,7 @@ public class MediatorClient implements MediatorPortType {
         }
     }
 
-    private void handleThings() {
+    public void handleThings() {
         try {
             uddiLookup();
             createStub();
@@ -128,111 +130,39 @@ public class MediatorClient implements MediatorPortType {
     }
 
     @Override
-    public String ping(String arg0) {
-         port.ping(arg0);
+	public String ping(String arg0) {
 
-        String response;
+		return this.frontEnd.ping(arg0);
+	}
 
-        try {
-            response = port.ping(arg0);
-        } catch (Exception e) {
-            try {
-                Thread.sleep(PING_INTERVAL + PING_OFFSET + 2000 );
-            } catch (InterruptedException e1) {
-                System.out.println("Thread not put to sleep:" + e1.getMessage());
-            }
-            handleThings();
-            response = port.ping(arg0);
-        }
-        return response;
-    }
+	@Override
+	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
 
-    @Override
-    public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
-        List<ItemView> response;
+		return this.frontEnd.searchItems(descText);
+	}
 
-        try {
-            response = port.searchItems(descText);
-        } catch (Exception e) {
-            if (e instanceof InvalidText_Exception) {
-                throw e;
-            }
-            try {
-                Thread.sleep(PING_INTERVAL + PING_OFFSET + 2000 );
-            } catch (InterruptedException e1) {
-                System.out.println("Thread not put to sleep:" + e1.getMessage());
-            }
-            handleThings();
-            response = port.searchItems(descText);
-        }
-        return response;
-    }
+	@Override
+	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
 
-    @Override
-    public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
-        List<ItemView> response;
+		return this.frontEnd.getItems(productId);
 
-        try {
-            response = port.getItems(productId);
-        } catch (Exception e) {
-            if (e instanceof InvalidItemId_Exception) {
-                throw e;
-            }
-            try {
-                Thread.sleep(PING_INTERVAL + PING_OFFSET + 2000 );
-            } catch (InterruptedException e1) {
-                System.out.println("Thread not put to sleep:" + e1.getMessage());
-            }
-            handleThings();
-            response = port.getItems(productId);
-        }
-        return response;
-    }
+	}
 
-    @Override
-    public ShoppingResultView buyCart(String cartId, String creditCardNr)
-            throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
-        ShoppingResultView response;
+	@Override
+	public ShoppingResultView buyCart(String cartId, String creditCardNr)
+			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
 
-        try {
-            response = port.buyCart(cartId, creditCardNr);
-        } catch (Exception e) {
-            if (e instanceof EmptyCart_Exception || e instanceof InvalidCartId_Exception
-                || e instanceof InvalidCreditCard_Exception) {
-                throw e;
-            }
-            try {
-                Thread.sleep(PING_INTERVAL + PING_OFFSET + 4000 );
-            } catch (InterruptedException e1) {
-                System.out.println("Thread not put to sleep:" + e1.getMessage());
-            }
-            handleThings();
-            response = port.buyCart(cartId, creditCardNr);
-        }
-        return response;
-    }
+		return this.frontEnd.buyCart(cartId, creditCardNr);
 
-    @Override
-    public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
-            InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+	}
 
-        try {
-            port.addToCart(cartId, itemId, itemQty);
-        } catch (Exception e) {
-            if (e instanceof InvalidCartId_Exception || e instanceof InvalidItemId_Exception
-                || e instanceof InvalidQuantity_Exception || e instanceof NotEnoughItems_Exception) {
-                throw e;
-            }
-            try {
-                Thread.sleep((PING_INTERVAL + PING_OFFSET)*2  );
-            } catch (InterruptedException e1) {
-                System.out.println("Thread not put to sleep:" + e1.getMessage());
-            }
-            handleThings();
-            port.addToCart(cartId, itemId, itemQty);
-        }
+	@Override
+	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
+			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
 
-    }
+		this.frontEnd.addToCart(cartId, itemId, itemQty);
+
+	}
 
     @Override
     public List<CartView> listCarts() {
